@@ -145,6 +145,7 @@ nav.scrolled{background:rgba(6,6,6,.94);backdrop-filter:blur(20px);border-bottom
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:20px;max-width:1320px;margin:0 auto}
 .pc{background:var(--ink3);border:1px solid rgba(255,255,255,.04);overflow:hidden;transition:.35s;cursor:none;position:relative}
 .pc:hover{border-color:rgba(212,160,23,.35);transform:translateY(-5px)}
+.pc:hover .pc-img img{transform:scale(1.06)}
 .pc-img{aspect-ratio:3/4;overflow:hidden;position:relative}
 .pc-jersey{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .pc-badge{position:absolute;top:10px;left:10px;z-index:2;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 9px}
@@ -614,53 +615,80 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
 // DATA
 // ════════════════════════════
 const PRODUCTS = [
-  {id:1, name:"Real Madrid",      era:"2000-01", type:"Home", league:"england",    price:38, old:55,  badge:"HOT", color:"#f5f5f5", bg:"linear-gradient(135deg,#1a1a2e,#0d0d1a)", legend:"cr7"},
-  {id:2, name:"Man. United",      era:"2007-08", type:"Home", league:"england",    price:40, old:58,  badge:"HOT", color:"#c00",    bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"cr7"},
-  {id:3, name:"Man. United",      era:"2006-07", type:"Away", league:"england",    price:38, old:null, badge:null, color:"#fff",    bg:"linear-gradient(135deg,#0a0a1a,#1a0000)", legend:"cr7"},
-  {id:4, name:"Man. United",      era:"1999-00", type:"Home", league:"england",    price:40, old:null, badge:null, color:"#c00",    bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"cr7"},
-  {id:5, name:"FC Barcelona",     era:"2011-12", type:"Home", league:"españa",     price:40, old:58,  badge:"HOT", color:"#a50044", bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
-  {id:6, name:"FC Barcelona",     era:"2009-10", type:"Home", league:"españa",     price:38, old:55,  badge:"HOT", color:"#a50044", bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
-  {id:7, name:"FC Barcelona",     era:"2008-09", type:"Home", league:"españa",     price:38, old:null, badge:"NEW", color:"#a50044",bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"triplete"},
-  {id:8, name:"FC Barcelona",     era:"2008-09", type:"Away", league:"españa",     price:38, old:null, badge:null, color:"#f5c518",bg:"linear-gradient(135deg,#1a1200,#2a1800)", legend:"triplete"},
-  {id:9, name:"FC Barcelona",     era:"1998-99", type:"Home", league:"españa",     price:38, old:null, badge:null, color:"#a50044",bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
-  {id:10,name:"España",           era:"2010",    type:"Home", league:"selecciones",price:40, old:55,  badge:"HOT", color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"iniesta"},
-  {id:11,name:"España",           era:"2008",    type:"Home", league:"selecciones",price:38, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"iniesta"},
-  {id:12,name:"Liverpool FC",     era:"2004-05", type:"Home", league:"england",    price:40, old:58,  badge:"HOT", color:"#cc0000",bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:null},
-  {id:13,name:"Ajax Amsterdam",   era:"1994-95", type:"Home", league:"europa",     price:38, old:null, badge:"HOT", color:"#fff",  bg:"linear-gradient(135deg,#1a0505,#300000)", legend:null},
-  {id:14,name:"Brasil",           era:"2002",    type:"Home", league:"selecciones",price:40, old:55,  badge:"HOT", color:"#f5c518",bg:"linear-gradient(135deg,#0a1a0a,#001a00)", legend:null},
-  {id:15,name:"Atlético Madrid",  era:"1995-96", type:"Home", league:"españa",     price:38, old:null, badge:"NEW", color:"#c0392b",bg:"linear-gradient(135deg,#1a0000,#300000)",legend:null},
-  {id:16,name:"Real Zaragoza",    era:"1993-94", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#001a3a,#000d2a)", legend:null},
-  {id:17,name:"AS Roma",          era:"2001-02", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#8b1a1a",bg:"linear-gradient(135deg,#1a0505,#2a0000)", legend:null},
-  {id:18,name:"O. Marseille",     era:"1992-93", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#0a1a2a,#051020)", legend:null},
-  {id:19,name:"Celtic FC",        era:"2002-03", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#1e7a1e",bg:"linear-gradient(135deg,#0a1a0a,#051005)", legend:null},
-  {id:20,name:"PSV Eindhoven",    era:"1988-89", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:null},
-  {id:21,name:"Boca Juniors",     era:"2001-02", type:"Home", league:"sudamerica", price:38, old:null, badge:null, color:"#0038a8",bg:"linear-gradient(135deg,#000a2a,#001550)", legend:null},
-  {id:22,name:"River Plate",      era:"1996-97", type:"Home", league:"sudamerica", price:38, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#1a1a1a,#0d0d0d)", legend:null},
-  {id:23,name:"Man. United",      era:"1996-97", type:"Away", league:"england",    price:38, old:null, badge:"NEW", color:"#fff",  bg:"linear-gradient(135deg,#0a0a1a,#1a0000)", legend:"cr7"},
-  {id:24,name:"Crystal Palace",   era:"1991-92", type:"Home", league:"england",    price:35, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#050a1a,#0a0014)", legend:null},
-  {id:25,name:"England",          era:"1982",    type:"Home", league:"selecciones",price:40, old:null, badge:"NEW", color:"#fff",  bg:"linear-gradient(135deg,#0a0a1a,#00001a)", legend:null},
-  {id:26,name:"Sporting Gijón",   era:"1999-00", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0505,#300000)", legend:null},
-  {id:27,name:"Málaga CF",        era:"2001-02", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#003087",bg:"linear-gradient(135deg,#001a3a,#000d2a)", legend:null},
+  // REAL MADRID
+  {id:1,  name:"Real Madrid",     era:"11-12", type:"Local",        league:"españa",     price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/d3956ea2/medium.jpg", legend:"cr7"},
+  {id:2,  name:"Real Madrid",     era:"05-06", type:"2ª Visitante", league:"españa",     price:38, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/0457ba6a/medium.jpg"},
+  {id:3,  name:"Real Madrid",     era:"96-97", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/72ccff42/medium.jpg"},
+  {id:4,  name:"Real Madrid",     era:"94-96", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/75e7bb02/medium.jpg"},
+  {id:5,  name:"Real Madrid",     era:"13-14", type:"Visitante",    league:"españa",     price:38, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/399747da/medium.jpg"},
+  {id:6,  name:"Real Madrid",     era:"07-08", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/88f5f395/medium.jpg", legend:"cr7"},
+  {id:7,  name:"Real Madrid",     era:"03-04", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/1dcd1c03/medium.jpg"},
+  // FC BARCELONA
+  {id:8,  name:"FC Barcelona",    era:"11-12", type:"Local",        league:"españa",     price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/009d629e/medium.jpg", legend:"messi"},
+  {id:9,  name:"FC Barcelona",    era:"09-10", type:"Local",        league:"españa",     price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/5c77fcb4/medium.jpg", legend:"triplete"},
+  {id:10, name:"FC Barcelona",    era:"08-09", type:"Local",        league:"españa",     price:38, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/b31ba608/medium.jpg", legend:"triplete"},
+  {id:11, name:"FC Barcelona",    era:"05-06", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/66fc2807/medium.jpg", legend:"messi"},
+  {id:12, name:"FC Barcelona",    era:"98-99", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4ab0b23a/medium.jpg"},
+  {id:13, name:"FC Barcelona",    era:"96-97", type:"Manga Larga",  league:"españa",     price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/655300ae/medium.jpg"},
+  // ATLÉTICO MADRID
+  {id:14, name:"Atlético Madrid", era:"98-99", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3eeff190/medium.jpg"},
+  {id:15, name:"Atlético Madrid", era:"13-14", type:"Local",        league:"españa",     price:38, old:null, badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/b36d74bf/medium.jpg"},
+  // SEVILLA
+  {id:16, name:"Sevilla FC",      era:"94-96", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4de6b415/medium.jpg"},
+  {id:17, name:"Sevilla FC",      era:"92-93", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/d93e67f9/medium.jpg"},
+  {id:18, name:"Sevilla FC",      era:"91-92", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3b445116/medium.jpg"},
+  // OTRAS ESPAÑOLAS
+  {id:19, name:"Athletic Bilbao", era:"97-98", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3b7cc9b9/medium.jpg"},
+  {id:20, name:"Valencia CF",     era:"99-00", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/dbef3984/medium.jpg"},
+  {id:21, name:"Real Betis",      era:"96-97", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/0966e885/medium.jpg"},
+  {id:22, name:"Dep. La Coruña",  era:"99-00", type:"Visitante",    league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4f2516ae/medium.jpg"},
+  {id:23, name:"Real Zaragoza",   era:"1984",  type:"Visitante",    league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/e0a350f5/medium.png"},
+  {id:24, name:"Oviedo",          era:"95",    type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/65298412/medium.png"},
+  // ENGLAND
+  {id:25, name:"Man. United",     era:"05-06", type:"Visitante",    league:"england",    price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/75013b7f/medium.jpg", legend:"cr7"},
+  {id:26, name:"Man. United",     era:"92-94", type:"Visitante ML", league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/d193cf97/medium.jpg"},
+  {id:27, name:"Liverpool FC",    era:"04-05", type:"Visitante",    league:"england",    price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/7500aa41/medium.jpg"},
+  {id:28, name:"Tottenham",       era:"1986",  type:"Local",        league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/7e9a0bbc/medium.jpg"},
+  {id:29, name:"Arsenal",         era:"91-93", type:"Visitante",    league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/8f18a5fc/medium.jpg"},
+  // SELECCIONES
+  {id:30, name:"España",          era:"2010",  type:"Local",        league:"selecciones",price:42, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/0a1183ae/medium.jpg", legend:"iniesta"},
+  {id:31, name:"España",          era:"98-99", type:"Local",        league:"selecciones",price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/575f7fb1/medium.jpg", legend:"iniesta"},
+  {id:32, name:"España",          era:"2010",  type:"Portero",      league:"selecciones",price:40, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/f904f488/medium.jpg"},
+  {id:33, name:"England",         era:"1982",  type:"Local",        league:"selecciones",price:40, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/c8871a4e/medium.jpg"},
+  {id:34, name:"Brasil",          era:"2014",  type:"Visitante",    league:"selecciones",price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/b6d96823/medium.jpg"},
+  {id:35, name:"Argentina",       era:"06-07", type:"Local ML",     league:"selecciones",price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/afbc8962/medium.jpg"},
+  // EUROPA
+  {id:36, name:"Inter Milan",     era:"09-10", type:"Local ML",     league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/25425ae8/medium.jpg"},
+  {id:37, name:"Fenerbahçe",      era:"08-09", type:"Local",        league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/6de58af4/medium.jpg"},
+  {id:38, name:"Fenerbahçe",      era:"07-08", type:"Visitante",    league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/f201fd99/medium.jpg"},
+  // SUDAMÉRICA
+  {id:39, name:"Santos FC",       era:"12-13", type:"Local ML",     league:"sudamerica", price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/28511808/medium.jpg"},
 ];
 
 // Jerseys asociados a cada leyenda
 const LEGEND_PRODUCTS = {
-  cr7:     [2,4,3],
-  messi:   [5,6,9],
-  iniesta: [10,11],
-  triplete:[7,8],
+  cr7:     [25, 1, 6],
+  messi:   [8, 9, 11],
+  iniesta: [30, 31],
+  triplete:[9, 10],
 };
 
 // ════════════════════════════
-// JERSEY SVG RENDER
+// JERSEY RENDER — foto real o SVG fallback
 // ════════════════════════════
 function jersey(p, size=100, h=120){
-  return `<div style="width:100%;height:100%;background:${p.bg};display:flex;align-items:center;justify-content:center">
+  if(p.img){
+    return `<div style="width:100%;height:100%;background:#0d0d0d;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <img src="${p.img}" alt="${p.name} ${p.era}" loading="lazy"
+           style="width:100%;height:100%;object-fit:contain;padding:8px;transition:transform .35s"/>
+    </div>`;
+  }
+  return `<div style="width:100%;height:100%;background:${p.bg||'#111'};display:flex;align-items:center;justify-content:center">
     <svg width="${size}" height="${h}" viewBox="0 0 100 120" style="filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))">
       <defs>
         <linearGradient id="jg${p.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${p.color}" stop-opacity="1"/>
-          <stop offset="100%" stop-color="${p.color}" stop-opacity=".7"/>
+          <stop offset="0%" stop-color="${p.color||'#fff'}" stop-opacity="1"/>
+          <stop offset="100%" stop-color="${p.color||'#fff'}" stop-opacity=".7"/>
         </linearGradient>
       </defs>
       <path d="M32 10L14 32l12 6-4 50h56l-4-50 12-6L68 10C66 17 52 21 50 21c-2 0-16-4-18-11z"
