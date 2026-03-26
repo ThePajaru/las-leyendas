@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LAS LEYENDAS — Camisetas Retro del Fútbol Eterno</title>
+<meta name="description" content="CR7 en el United. Messi en el Barça. Iniesta en Johannesburgo. Viste la historia del fútbol más grande."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:ital,wght@0,700;1,300;1,400&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#060606;--ink2:#101010;--ink3:#1a1a1a;
+  --cream:#f5f0e8;--cream2:#e8e0cc;
+  --gold:#d4a017;--gold2:#f0c040;--gold3:#ffd700;
+  --red:#c0392b;--red2:#e74c3c;
+  --white:#ffffff;--gray:#888;
+  --fd:'Bebas Neue',sans-serif;
+  --fs:'Playfair Display',serif;
+  --fb:'Space Grotesk',sans-serif;
+}
+
+/* ── RESET & BASE ── */
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+body{background:var(--ink);color:var(--cream);font-family:var(--fb);overflow-x:hidden;cursor:none}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--gold)}
+
+/* ── CUSTOM CURSOR ── */
+.cursor{position:fixed;pointer-events:none;z-index:9998;transition:transform .15s}
+.cursor-ball{width:12px;height:12px;border-radius:50%;background:var(--gold);position:absolute;top:-6px;left:-6px;transition:transform .2s,background .2s}
+.cursor-ring{width:40px;height:40px;border-radius:50%;border:1px solid rgba(212,160,23,.5);position:absolute;top:-20px;left:-20px;transition:transform .08s}
+body:has(a:hover) .cursor-ball,body:has(button:hover) .cursor-ball{transform:scale(2.5);background:var(--gold2)}
+body:has(a:hover) .cursor-ring,body:has(button:hover) .cursor-ring{transform:scale(0.5);opacity:0}
+
+/* ── GRAIN ── */
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E");pointer-events:none;z-index:9997;opacity:.45;mix-blend-mode:overlay}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;z-index:9000;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s,visibility .8s}
+#loader.gone{opacity:0;visibility:hidden}
+.loader-logo{font-family:var(--fd);font-size:64px;letter-spacing:8px;color:var(--white);line-height:1;margin-bottom:8px}
+.loader-sub{font-family:var(--fs);font-style:italic;font-size:18px;color:var(--gold);opacity:.7;margin-bottom:32px}
+.loader-bar{width:200px;height:2px;background:rgba(255,255,255,.1);overflow:hidden}
+.loader-fill{height:100%;background:var(--gold);width:0;transition:width 1.8s cubic-bezier(.4,0,.2,1)}
+.loader-years{font-family:var(--fd);font-size:120px;color:rgba(255,255,255,.03);position:absolute;letter-spacing:4px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 52px;height:66px;display:flex;align-items:center;justify-content:space-between;transition:background .4s,backdrop-filter .4s}
+nav.scrolled{background:rgba(6,6,6,.94);backdrop-filter:blur(20px);border-bottom:1px solid rgba(212,160,23,.1)}
+.nav-logo{text-decoration:none;display:flex;flex-direction:column;line-height:1}
+.nav-logo-main{font-family:var(--fd);font-size:22px;letter-spacing:5px;color:var(--white)}
+.nav-logo-sub{font-family:var(--fs);font-style:italic;font-size:10px;color:var(--gold);opacity:.7;letter-spacing:2px}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{color:rgba(255,255,255,.55);text-decoration:none;font-size:11px;letter-spacing:3px;text-transform:uppercase;transition:.2s;border-bottom:1px solid transparent;padding-bottom:2px}
+.nav-links a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.nav-r{display:flex;align-items:center;gap:12px}
+.sound-btn{background:none;border:1px solid rgba(255,255,255,.2);color:var(--cream);width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:none;font-size:16px;transition:.2s}
+.sound-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nav-cart{background:var(--gold);color:var(--ink);border:none;padding:10px 22px;font-family:var(--fb);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:none;display:flex;align-items:center;gap:8px;transition:.2s}
+.nav-cart:hover{background:var(--gold2)}
+.cart-n{background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:900}
+
+/* ── FULLSCREEN VIDEO SECTION ── */
+.vid-section{position:relative;height:100vh;scroll-snap-align:start;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.vid-section video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.4s}
+.vid-section.active video{opacity:1}
+.vid-overlay{position:absolute;inset:0;pointer-events:none}
+.vid-content{position:relative;z-index:2;text-align:center;padding:0 40px;max-width:1000px}
+.vid-number{font-family:var(--fd);font-size:clamp(200px,22vw,320px);color:rgba(255,255,255,.04);position:absolute;left:50%;transform:translateX(-50%);top:50%;margin-top:-0.5em;line-height:1;pointer-events:none;user-select:none}
+.vid-eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:20px;opacity:0;transform:translateY(30px);transition:all .8s .2s}
+.vid-eyebrow-line{width:36px;height:1px;background:var(--gold)}
+.vid-eyebrow span{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold)}
+.vid-name{font-family:var(--fd);font-size:clamp(60px,9vw,140px);line-height:.88;color:var(--white);opacity:0;transform:translateY(40px);transition:all .9s .35s;text-shadow:0 4px 40px rgba(0,0,0,.8)}
+.vid-name .glow{color:var(--gold);text-shadow:0 0 60px rgba(212,160,23,.5)}
+.vid-quote{font-family:var(--fs);font-style:italic;font-size:clamp(15px,2vw,22px);color:var(--cream);opacity:0;transform:translateY(30px);transition:all .8s .55s;max-width:700px;margin:20px auto 0;line-height:1.65;text-shadow:0 2px 20px rgba(0,0,0,.9)}
+.vid-cta{opacity:0;transform:translateY(20px);transition:all .7s .75s;margin-top:32px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.vid-section.active .vid-eyebrow,
+.vid-section.active .vid-name,
+.vid-section.active .vid-quote,
+.vid-section.active .vid-cta{opacity:1;transform:none}
+.btn-light{display:inline-block;background:var(--gold);color:var(--ink);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px 36px;transition:.25s}
+.btn-light:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(212,160,23,.3)}
+.btn-ghost-light{display:inline-block;border:1px solid rgba(255,255,255,.3);color:var(--cream);text-decoration:none;font-size:12px;letter-spacing:3px;text-transform:uppercase;padding:14px 36px;transition:.25s}
+.btn-ghost-light:hover{border-color:var(--gold);color:var(--gold)}
+
+/* scroll indicator */
+.scroll-ind{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;z-index:3;opacity:.5}
+.scroll-ind span{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--cream)}
+.scroll-dot{width:1px;height:48px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollDot 2s infinite}
+@keyframes scrollDot{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* era badge */
+.era-badge{position:absolute;top:88px;right:40px;z-index:3;background:rgba(0,0,0,.5);border:1px solid rgba(212,160,23,.3);padding:10px 18px;backdrop-filter:blur(10px);text-align:right}
+.era-badge-yr{font-family:var(--fd);font-size:28px;color:var(--gold);line-height:1}
+.era-badge-lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+
+/* legend jerseys row */
+.legend-jerseys{display:flex;gap:16px;justify-content:center;margin-top:28px;opacity:0;transform:translateY(20px);transition:all .8s .9s}
+.vid-section.active .legend-jerseys{opacity:1;transform:none}
+.lj-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);padding:14px 18px;cursor:none;transition:.3s;min-width:130px;text-align:center}
+.lj-card:hover{background:rgba(212,160,23,.1);border-color:rgba(212,160,23,.4);transform:translateY(-4px)}
+.lj-name{font-family:var(--fd);font-size:14px;letter-spacing:1px;color:var(--white);margin-bottom:2px}
+.lj-era{font-size:10px;color:var(--gold);letter-spacing:1px}
+.lj-price{font-family:var(--fd);font-size:18px;color:var(--cream);margin-top:6px}
+
+/* ── HERO SECTION ── */
+#hero-section{scroll-snap-align:start}
+.hero-vid-wrap{position:absolute;inset:0;overflow:hidden}
+.hero-vid-wrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity 1.5s}
+.hero-vid-wrap video.active{opacity:1}
+.hero-vid-wrap video:not(.active){opacity:0}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,6,6,.3) 0%,rgba(6,6,6,.2) 40%,rgba(6,6,6,.7) 80%,rgba(6,6,6,.95) 100%)}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 40px}
+.hero-pretext{font-family:var(--fs);font-style:italic;font-size:18px;color:var(--gold);opacity:.8;margin-bottom:12px;letter-spacing:2px}
+.hero-title{font-family:var(--fd);font-size:clamp(72px,11vw,160px);line-height:.86;color:var(--white);margin-bottom:4px;text-shadow:0 4px 60px rgba(0,0,0,.8)}
+.hero-title .line2{color:var(--gold);-webkit-text-stroke:0;display:block}
+.hero-title .line3{-webkit-text-stroke:1px rgba(255,255,255,.35);color:transparent;display:block;font-size:.7em}
+.hero-sub{font-family:var(--fs);font-style:italic;font-size:17px;color:var(--cream);opacity:.6;margin:20px auto 36px;max-width:560px;line-height:1.65}
+.hero-dots{display:flex;gap:8px;justify-content:center;margin-top:32px}
+.hero-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);cursor:none;transition:.3s}
+.hero-dot.on{background:var(--gold);transform:scale(1.3)}
+.vid-labels{position:absolute;bottom:100px;left:0;right:0;display:flex;justify-content:center;gap:4px;z-index:3;flex-wrap:wrap;padding:0 20px}
+.vid-label{font-family:var(--fd);font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);cursor:none;transition:.3s;backdrop-filter:blur(8px)}
+.vid-label.on{background:rgba(212,160,23,.15);border-color:var(--gold);color:var(--gold)}
+
+/* ── MARQUEE ── */
+.marquee-sec{background:var(--gold);padding:12px 0;overflow:hidden;white-space:nowrap;scroll-snap-align:none}
+.mq-track{display:inline-block;animation:mqA 28s linear infinite}
+.mq-item{display:inline-block;font-family:var(--fd);font-size:13px;letter-spacing:3px;color:var(--ink);padding:0 24px}
+.mq-dot{display:inline-block;width:5px;height:5px;background:rgba(0,0,0,.2);border-radius:50%;vertical-align:middle}
+@keyframes mqA{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── PRODUCT SECTION ── */
+.prod-section{background:var(--ink2);scroll-snap-align:start;padding:80px 48px}
+.prod-sec-hd{text-align:center;margin-bottom:56px}
+.sec-eye{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:12px;font-weight:600}
+.sec-tit{font-family:var(--fd);font-size:clamp(40px,5vw,68px);color:var(--white);line-height:1}
+.sec-tit .gold{color:var(--gold)}
+.sec-div{width:48px;height:2px;background:var(--gold);margin:14px auto 0}
+.filter-bar{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:40px}
+.fb{background:none;border:1px solid rgba(255,255,255,.1);color:var(--cream);font-family:var(--fb);font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 20px;cursor:none;transition:.2s;opacity:.5}
+.fb:hover{opacity:1;border-color:rgba(212,160,23,.5);color:var(--gold)}
+.fb.on{background:var(--gold);border-color:var(--gold);color:var(--ink);opacity:1}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:20px;max-width:1320px;margin:0 auto}
+.pc{background:var(--ink3);border:1px solid rgba(255,255,255,.04);overflow:hidden;transition:.35s;cursor:none;position:relative}
+.pc:hover{border-color:rgba(212,160,23,.35);transform:translateY(-5px)}
+.pc-img{aspect-ratio:3/4;overflow:hidden;position:relative}
+.pc-jersey{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.pc-badge{position:absolute;top:10px;left:10px;z-index:2;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 9px}
+.pb-hot{background:var(--red);color:#fff}
+.pb-new{background:var(--gold);color:var(--ink)}
+.pc-hover{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;z-index:3}
+.pc:hover .pc-hover{opacity:1}
+.pc-add{background:var(--gold);color:var(--ink);border:none;font-family:var(--fb);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 28px;cursor:none;width:78%;transition:.2s}
+.pc-add:hover{background:var(--gold2)}
+.pc-info{padding:14px 18px 20px}
+.pc-era{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;opacity:.8}
+.pc-name{font-family:var(--fd);font-size:19px;letter-spacing:1px;color:var(--white);margin-bottom:2px}
+.pc-type{font-size:11px;color:var(--gray);margin-bottom:12px;letter-spacing:1px}
+.pc-foot{display:flex;justify-content:space-between;align-items:center}
+.pc-price{font-family:var(--fd);font-size:24px;color:var(--gold)}
+.pc-price del{font-size:14px;color:#555;margin-right:4px}
+.pcsz{display:flex;gap:3px}
+.sz{width:24px;height:24px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.35);cursor:none;transition:.15s}
+.sz:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── TRUST ── */
+.trust-sec{background:var(--ink);padding:60px 48px;scroll-snap-align:none}
+.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;max-width:1100px;margin:0 auto}
+.ti{background:var(--ink2);padding:32px 24px;text-align:center;transition:.3s;border:1px solid rgba(255,255,255,.03)}
+.ti:hover{background:rgba(212,160,23,.04);border-color:rgba(212,160,23,.15)}
+.ti-icon{font-size:32px;margin-bottom:14px;display:block}
+.ti-title{font-family:var(--fd);font-size:17px;letter-spacing:2px;color:var(--white);margin-bottom:6px}
+.ti-text{font-size:13px;color:var(--gray);line-height:1.6}
+
+/* ── NEWSLETTER ── */
+.nl-sec{background:var(--ink2);padding:88px 40px;text-align:center;scroll-snap-align:none;border-top:1px solid rgba(212,160,23,.08)}
+.nl-tit{font-family:var(--fd);font-size:clamp(36px,4vw,56px);color:var(--white);margin-bottom:8px}
+.nl-sub{font-family:var(--fs);font-style:italic;font-size:17px;color:var(--cream);opacity:.5;margin-bottom:32px}
+.nl-form{display:flex;max-width:440px;margin:0 auto}
+.nl-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-right:none;color:var(--cream);font-family:var(--fb);font-size:14px;padding:13px 18px;outline:none;transition:.2s}
+.nl-inp:focus{border-color:var(--gold)}
+.nl-inp::placeholder{color:rgba(255,255,255,.2)}
+.nl-btn{background:var(--gold);color:var(--ink);border:none;font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 22px;cursor:none;transition:.2s;white-space:nowrap}
+.nl-btn:hover{background:var(--gold2)}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:56px 60px 32px;scroll-snap-align:none}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px}
+.fb-brand p{font-size:13px;color:var(--gray);line-height:1.7;max-width:260px;margin-top:10px}
+.fc h4{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.fc ul{list-style:none}
+.fc li{margin-bottom:9px}
+.fc a{color:var(--gray);text-decoration:none;font-size:13px;transition:.2s}
+.fc a:hover{color:var(--cream)}
+.fbot{border-top:1px solid rgba(255,255,255,.04);padding-top:20px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:10px}
+.pay-row{display:flex;gap:6px}
+.pay{background:rgba(255,255,255,.06);border-radius:2px;padding:3px 7px;font-size:9px;letter-spacing:1px;color:rgba(255,255,255,.25)}
+
+/* ── CART ── */
+.cart-mask{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;opacity:0;pointer-events:none;transition:.3s}
+.cart-mask.on{opacity:1;pointer-events:all}
+.cart-panel{position:fixed;top:0;right:0;bottom:0;width:400px;background:var(--ink2);z-index:201;transform:translateX(100%);transition:.35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid rgba(212,160,23,.15)}
+.cart-panel.on{transform:none}
+.cart-head{padding:22px 24px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center}
+.cart-head h3{font-family:var(--fd);font-size:22px;letter-spacing:3px;color:var(--white)}
+.cart-x{background:none;border:none;color:var(--gray);cursor:none;font-size:20px;transition:.2s}
+.cart-x:hover{color:#fff}
+.cart-body{flex:1;overflow-y:auto;padding:16px}
+.cart-empty{text-align:center;padding:56px 20px}
+.ce-ico{font-size:44px;display:block;margin-bottom:14px}
+.ce-txt{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gray)}
+.cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ci-img{width:64px;height:82px;background:var(--ink3);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.ci-info{flex:1}
+.ci-name{font-family:var(--fd);font-size:15px;color:var(--white);margin-bottom:2px}
+.ci-meta{font-size:11px;color:var(--gray);margin-bottom:8px}
+.ci-ctrl{display:flex;align-items:center;gap:8px}
+.qb{background:var(--ink3);border:1px solid rgba(255,255,255,.08);color:var(--cream);width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:none;transition:.15s;font-size:14px}
+.qb:hover{border-color:var(--gold)}
+.qn{font-family:var(--fd);font-size:14px;min-width:20px;text-align:center;color:var(--white)}
+.ci-rm{background:none;border:none;color:#444;cursor:none;font-size:15px;padding:0 2px;transition:.2s;margin-left:4px}
+.ci-rm:hover{color:var(--red)}
+.ci-price{font-family:var(--fd);font-size:20px;color:var(--gold);align-self:center}
+.cart-foot{padding:18px 24px;border-top:1px solid rgba(255,255,255,.05)}
+.cart-sub{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.cart-sub span:first-child{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray)}
+.cart-sub .ctotal{font-family:var(--fd);font-size:26px;color:var(--gold)}
+.cart-cta{display:block;width:100%;background:var(--gold);color:var(--ink);border:none;font-family:var(--fb);font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:15px;cursor:none;transition:.2s;margin-bottom:10px}
+.cart-cta:hover{background:var(--gold2)}
+.cart-note{text-align:center;font-size:11px;color:var(--gray);letter-spacing:.5px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,80px);background:var(--gold);color:var(--ink);font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 28px;z-index:300;opacity:0;transition:.35s cubic-bezier(.4,0,.2,1);white-space:nowrap}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:0 20px}
+  .nav-links{display:none}
+  .vid-content{padding:0 20px}
+  .vid-name{font-size:clamp(50px,12vw,90px)}
+  .vid-quote{font-size:15px}
+  .legend-jerseys{display:none}
+  .prod-section{padding:60px 20px}
+  .trust-grid{grid-template-columns:repeat(2,1fr)}
+  footer{padding:48px 20px}
+  .fg{grid-template-columns:1fr 1fr}
+  .cart-panel{width:100%}
+  body{cursor:auto}
+  .cursor{display:none}
+}
+@media(max-width:520px){
+  .pgrid{grid-template-columns:1fr}
+  .hero-title{font-size:clamp(56px,14vw,90px)}
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div class="cursor" id="cursor"><div class="cursor-ring"></div><div class="cursor-ball"></div></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-years">1982 — 2012</div>
+  <div class="loader-logo">LAS LEYENDAS</div>
+  <div class="loader-sub">Cargando la historia del fútbol...</div>
+  <div class="loader-bar"><div class="loader-fill" id="loaderFill"></div></div>
+</div>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo">
+    <span class="nav-logo-main">LAS LEYENDAS</span>
+    <span class="nav-logo-sub">Camisetas Retro Eternas</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#cr7">Cristiano</a></li>
+    <li><a href="#messi">Messi</a></li>
+    <li><a href="#iniesta">Iniesta</a></li>
+    <li><a href="#triplete">El Triplete</a></li>
+    <li><a href="#catalogo">Catálogo</a></li>
+  </ul>
+  <div class="nav-r">
+    <button class="sound-btn" id="soundBtn" title="Sonido" onclick="toggleSound()">🔇</button>
+    <button class="nav-cart" onclick="toggleCart()">⚽ <span>Carrito</span><span class="cart-n" id="cartCount">0</span></button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════
+     HERO — Todos los vídeos rotando
+══════════════════════════════════════ -->
+<section class="vid-section" id="hero-section">
+  <div class="hero-vid-wrap" id="heroVids">
+    <video id="hv0" src="videos%20pagina%20web/edit%20cristiano.mp4"       muted playsinline loop preload="auto"></video>
+    <video id="hv1" src="videos%20pagina%20web/triplete%202008-2009.mp4"   muted playsinline loop preload="auto"></video>
+    <video id="hv2" src="videos%20pagina%20web/iniesta%20mundial%202010.mp4" muted playsinline loop preload="auto"></video>
+    <video id="hv3" src="videos%20pagina%20web/messi%202011-2012.mp4"      muted playsinline loop preload="auto"></video>
+  </div>
+  <div class="hero-overlay" style="background:linear-gradient(to bottom,rgba(6,6,6,.25) 0%,rgba(6,6,6,.15) 35%,rgba(6,6,6,.65) 75%,rgba(6,6,6,.97) 100%)"></div>
+
+  <div class="hero-content vid-content">
+    <p class="hero-pretext">La colección que estabas esperando</p>
+    <h1 class="hero-title">
+      VISTE<br/>
+      <span class="line2">EL FÚTBOL</span>
+      <span class="line3">ETERNO</span>
+    </h1>
+    <p class="hero-sub">CR7 en el United. Messi en el Barça. Iniesta en Johannesburgo. No son camisetas — son los momentos que nunca olvidarás.</p>
+    <div class="hero-ctas vid-cta" style="opacity:1;transform:none">
+      <a href="#cr7" class="btn-light">Descubrir las Leyendas</a>
+      <a href="#catalogo" class="btn-ghost-light">Ver Catálogo Completo</a>
+    </div>
+    <div class="hero-dots" id="heroDots">
+      <div class="hero-dot on" onclick="switchHeroVid(0)"></div>
+      <div class="hero-dot" onclick="switchHeroVid(1)"></div>
+      <div class="hero-dot" onclick="switchHeroVid(2)"></div>
+      <div class="hero-dot" onclick="switchHeroVid(3)"></div>
+    </div>
+  </div>
+
+  <div class="vid-labels">
+    <div class="vid-label on" onclick="switchHeroVid(0)">CR7</div>
+    <div class="vid-label" onclick="switchHeroVid(1)">Triplete 09</div>
+    <div class="vid-label" onclick="switchHeroVid(2)">Iniesta 2010</div>
+    <div class="vid-label" onclick="switchHeroVid(3)">Messi 2012</div>
+  </div>
+
+  <div class="scroll-ind"><span>Scroll</span><div class="scroll-dot"></div></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-sec">
+  <div class="mq-track">
+    <span class="mq-item">Cristiano Ronaldo</span><span class="mq-dot"></span>
+    <span class="mq-item">Lionel Messi</span><span class="mq-dot"></span>
+    <span class="mq-item">Andrés Iniesta</span><span class="mq-dot"></span>
+    <span class="mq-item">Ronaldinho</span><span class="mq-dot"></span>
+    <span class="mq-item">Xavi Hernández</span><span class="mq-dot"></span>
+    <span class="mq-item">Zinedine Zidane</span><span class="mq-dot"></span>
+    <span class="mq-item">Thierry Henry</span><span class="mq-dot"></span>
+    <span class="mq-item">Ronaldo Nazário</span><span class="mq-dot"></span>
+    <span class="mq-item">Fernando Torres</span><span class="mq-dot"></span>
+    <span class="mq-item">Rivaldo</span><span class="mq-dot"></span>
+    <span class="mq-item">Cristiano Ronaldo</span><span class="mq-dot"></span>
+    <span class="mq-item">Lionel Messi</span><span class="mq-dot"></span>
+    <span class="mq-item">Andrés Iniesta</span><span class="mq-dot"></span>
+    <span class="mq-item">Ronaldinho</span><span class="mq-dot"></span>
+    <span class="mq-item">Xavi Hernández</span><span class="mq-dot"></span>
+    <span class="mq-item">Zinedine Zidane</span><span class="mq-dot"></span>
+    <span class="mq-item">Thierry Henry</span><span class="mq-dot"></span>
+    <span class="mq-item">Ronaldo Nazário</span><span class="mq-dot"></span>
+    <span class="mq-item">Fernando Torres</span><span class="mq-dot"></span>
+    <span class="mq-item">Rivaldo</span><span class="mq-dot"></span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CR7 — MANCHESTER UNITED
+══════════════════════════════════════ -->
+<section class="vid-section" id="cr7" data-vid="videos%20pagina%20web/edit%20cristiano.mp4">
+  <video muted playsinline loop preload="none"></video>
+  <div class="vid-overlay" style="background:linear-gradient(135deg,rgba(192,57,43,.35) 0%,rgba(6,6,6,.6) 40%,rgba(6,6,6,.8) 100%)"></div>
+  <div class="era-badge"><div class="era-badge-yr">7</div><div class="era-badge-lbl">Manchester United</div></div>
+  <div class="vid-number">7</div>
+  <div class="vid-content">
+    <div class="vid-eyebrow"><div class="vid-eyebrow-line"></div><span>Old Trafford · 2003–2009</span></div>
+    <h2 class="vid-name">CRISTIANO<br/><span class="glow">RONALDO</span></h2>
+    <p class="vid-quote">"No vine aquí a ser el segundo mejor. Vine a ser el mejor del mundo."<br/>— <em style="opacity:.6;font-size:.85em">6 temporadas. 292 partidos. 145 goles. 3 Premier Leagues. 1 Champions.</em></p>
+    <div class="vid-cta">
+      <a href="#catalogo" class="btn-light" onclick="filterProd('england')">Ver Camisetas Manchester</a>
+      <a href="#catalogo" class="btn-ghost-light">Todo el Catálogo</a>
+    </div>
+    <div class="legend-jerseys" id="cr7jerseys"></div>
+  </div>
+  <div class="scroll-ind"><span>Siguiente</span><div class="scroll-dot"></div></div>
+</section>
+
+<!-- ══════════════════════════════════════
+     MESSI — FC BARCELONA
+══════════════════════════════════════ -->
+<section class="vid-section" id="messi" data-vid="videos%20pagina%20web/messi%202011-2012.mp4">
+  <video muted playsinline loop preload="none"></video>
+  <div class="vid-overlay" style="background:linear-gradient(135deg,rgba(0,87,184,.3) 0%,rgba(165,0,68,.2) 30%,rgba(6,6,6,.75) 100%)"></div>
+  <div class="era-badge"><div class="era-badge-yr">10</div><div class="era-badge-lbl">FC Barcelona</div></div>
+  <div class="vid-number">10</div>
+  <div class="vid-content">
+    <div class="vid-eyebrow"><div class="vid-eyebrow-line"></div><span>Camp Nou · 2004–2021</span></div>
+    <h2 class="vid-name">LIONEL<br/><span class="glow">MESSI</span></h2>
+    <p class="vid-quote">"91 goles en 2012. <em style="color:var(--gold)">Noventa y uno.</em> En un año natural. Nunca antes. Nunca después."<br/><em style="opacity:.55;font-size:.85em">4 Balones de Oro consecutivos. 10 LaLigas. La figura más grande del Camp Nou.</em></p>
+    <div class="vid-cta">
+      <a href="#catalogo" class="btn-light" onclick="filterProd('españa')">Ver Camisetas Barça</a>
+      <a href="#catalogo" class="btn-ghost-light">Todo el Catálogo</a>
+    </div>
+    <div class="legend-jerseys" id="messijerseys"></div>
+  </div>
+  <div class="scroll-ind"><span>Siguiente</span><div class="scroll-dot"></div></div>
+</section>
+
+<!-- ══════════════════════════════════════
+     INIESTA — ESPAÑA 2010
+══════════════════════════════════════ -->
+<section class="vid-section" id="iniesta" data-vid="videos%20pagina%20web/iniesta%20mundial%202010.mp4">
+  <video muted playsinline loop preload="none"></video>
+  <div class="vid-overlay" style="background:linear-gradient(135deg,rgba(192,0,0,.35) 0%,rgba(6,6,6,.65) 50%,rgba(6,6,6,.85) 100%)"></div>
+  <div class="era-badge"><div class="era-badge-yr">8</div><div class="era-badge-lbl">España · Mundial 2010</div></div>
+  <div class="vid-number">8</div>
+  <div class="vid-content">
+    <div class="vid-eyebrow"><div class="vid-eyebrow-line"></div><span>Johannesburgo · 11 julio 2010 · min. 116</span></div>
+    <h2 class="vid-name">ANDRÉS<br/><span class="glow">INIESTA</span></h2>
+    <p class="vid-quote">"116 minutos de tensión. Un disparo. Un gol. <em style="color:var(--gold)">Y España se quitó la camiseta.</em><br/>El gol más grande de la historia del fútbol español."<br/><em style="opacity:.55;font-size:.85em">La primera Copa del Mundo de España. Para siempre.</em></p>
+    <div class="vid-cta">
+      <a href="#catalogo" class="btn-light" onclick="filterProd('selecciones')">Ver Camisetas España</a>
+      <a href="#catalogo" class="btn-ghost-light">Todo el Catálogo</a>
+    </div>
+    <div class="legend-jerseys" id="iniestajerseys"></div>
+  </div>
+  <div class="scroll-ind"><span>Siguiente</span><div class="scroll-dot"></div></div>
+</section>
+
+<!-- ══════════════════════════════════════
+     EL TRIPLETE 2009 — BARCELONA
+══════════════════════════════════════ -->
+<section class="vid-section" id="triplete" data-vid="videos%20pagina%20web/triplete%202008-2009.mp4">
+  <video muted playsinline loop preload="none"></video>
+  <div class="vid-overlay" style="background:linear-gradient(135deg,rgba(0,87,184,.25) 0%,rgba(165,0,68,.2) 25%,rgba(6,6,6,.75) 100%)"></div>
+  <div class="era-badge"><div class="era-badge-yr">09</div><div class="era-badge-lbl">Temporada Perfecta</div></div>
+  <div class="vid-number">3</div>
+  <div class="vid-content">
+    <div class="vid-eyebrow"><div class="vid-eyebrow-line"></div><span>FC Barcelona · Temporada 2008-09</span></div>
+    <h2 class="vid-name">EL<br/><span class="glow">TRIPLETE</span></h2>
+    <p class="vid-quote">"Liga. Copa del Rey. Champions League. <em style="color:var(--gold)">Las tres en una misma temporada.</em><br/>Pep Guardiola, Messi, Xavi, Iniesta, Henry, Eto'o. La temporada perfecta."<br/><em style="opacity:.55;font-size:.85em">El mejor equipo de clubes de la historia del fútbol.</em></p>
+    <div class="vid-cta">
+      <a href="#catalogo" class="btn-light" onclick="filterProd('españa')">Ver Camisetas Barça</a>
+      <a href="#catalogo" class="btn-ghost-light">Todo el Catálogo</a>
+    </div>
+    <div class="legend-jerseys" id="tripletejerseys"></div>
+  </div>
+  <div class="scroll-ind"><span>Ver Catálogo</span><div class="scroll-dot"></div></div>
+</section>
+
+<!-- ══════════════════════════════════════
+     CATÁLOGO COMPLETO
+══════════════════════════════════════ -->
+<section class="prod-section" id="catalogo">
+  <div class="prod-sec-hd">
+    <span class="sec-eye">La Colección Completa</span>
+    <h2 class="sec-tit">TODAS LAS <span class="gold">CAMISETAS</span></h2>
+    <div class="sec-div"></div>
+  </div>
+  <div class="filter-bar">
+    <button class="fb on" onclick="filterProd('all',this)">Todas</button>
+    <button class="fb" id="fb-españa" onclick="filterProd('españa',this)">España</button>
+    <button class="fb" id="fb-england" onclick="filterProd('england',this)">Inglaterra</button>
+    <button class="fb" id="fb-europa" onclick="filterProd('europa',this)">Europa</button>
+    <button class="fb" id="fb-sudamerica" onclick="filterProd('sudamerica',this)">Sudamérica</button>
+    <button class="fb" id="fb-selecciones" onclick="filterProd('selecciones',this)">Selecciones</button>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</section>
+
+<!-- TRUST -->
+<div class="trust-sec">
+  <div class="trust-grid">
+    <div class="ti"><span class="ti-icon">🏆</span><div class="ti-title">Calidad Premium</div><p class="ti-text">Bordados y telas que replican fielmente los originales de cada época histórica.</p></div>
+    <div class="ti"><span class="ti-icon">🚚</span><div class="ti-title">Envío a España</div><p class="ti-text">5-10 días hábiles. Gratis en pedidos superiores a 50€. Seguimiento incluido.</p></div>
+    <div class="ti"><span class="ti-icon">📏</span><div class="ti-title">Tallas S — 2XL</div><p class="ti-text">Todos los modelos en S, M, L, XL y 2XL con guía de tallas detallada.</p></div>
+    <div class="ti"><span class="ti-icon">🔄</span><div class="ti-title">30 Días Garantía</div><p class="ti-text">Devoluciones sin preguntas. Tu satisfacción o te devolvemos el dinero.</p></div>
+  </div>
+</div>
+
+<!-- NEWSLETTER -->
+<div class="nl-sec">
+  <h2 class="nl-tit">ÚNETE A LAS LEYENDAS</h2>
+  <p class="nl-sub">Sé el primero en conocer nuevas llegadas y ofertas exclusivas</p>
+  <form class="nl-form" onsubmit="return nlSub(event)">
+    <input class="nl-inp" type="email" placeholder="tu@email.com" required/>
+    <button class="nl-btn" type="submit">Suscribirme</button>
+  </form>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fg">
+    <div class="fb-brand">
+      <a href="#" class="nav-logo" style="display:inline-flex;flex-direction:column;text-decoration:none">
+        <span class="nav-logo-main">LAS LEYENDAS</span>
+        <span class="nav-logo-sub">Camisetas Retro Eternas</span>
+      </a>
+      <p style="margin-top:10px">Para los que vivieron los momentos más grandes del fútbol y quieren llevarlos puestos.</p>
+    </div>
+    <div class="fc"><h4>Leyendas</h4><ul><li><a href="#cr7">Cristiano Ronaldo</a></li><li><a href="#messi">Lionel Messi</a></li><li><a href="#iniesta">Andrés Iniesta</a></li><li><a href="#triplete">El Triplete</a></li></ul></div>
+    <div class="fc"><h4>Ayuda</h4><ul><li><a href="#">Guía de tallas</a></li><li><a href="#">Envíos</a></li><li><a href="#">Devoluciones</a></li><li><a href="#">Contacto</a></li></ul></div>
+    <div class="fc"><h4>Legal</h4><ul><li><a href="#">Aviso legal</a></li><li><a href="#">Privacidad</a></li><li><a href="#">Cookies</a></li><li><a href="#">Condiciones</a></li></ul></div>
+  </div>
+  <div class="fbot">
+    <span>© 2025 Las Leyendas. Todos los derechos reservados.</span>
+    <div class="pay-row"><span class="pay">VISA</span><span class="pay">MC</span><span class="pay">PAYPAL</span><span class="pay">BIZUM</span></div>
+  </div>
+</footer>
+
+<!-- CART -->
+<div class="cart-mask" id="cartMask" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-head"><h3>Tu Carrito</h3><button class="cart-x" onclick="toggleCart()">✕</button></div>
+  <div class="cart-body" id="cartBody"><div class="cart-empty"><span class="ce-ico">⚽</span><p class="ce-txt">Carrito vacío</p></div></div>
+  <div class="cart-foot" id="cartFoot" style="display:none">
+    <div class="cart-sub"><span>Subtotal</span><span class="ctotal" id="cartTotal">0€</span></div>
+    <button class="cart-cta">Finalizar Compra →</button>
+    <p class="cart-note">🔒 Pago seguro · Bizum · PayPal · Tarjeta</p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════
+// DATA
+// ════════════════════════════
+const PRODUCTS = [
+  {id:1, name:"Real Madrid",      era:"2000-01", type:"Home", league:"england",    price:38, old:55,  badge:"HOT", color:"#f5f5f5", bg:"linear-gradient(135deg,#1a1a2e,#0d0d1a)", legend:"cr7"},
+  {id:2, name:"Man. United",      era:"2007-08", type:"Home", league:"england",    price:40, old:58,  badge:"HOT", color:"#c00",    bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"cr7"},
+  {id:3, name:"Man. United",      era:"2006-07", type:"Away", league:"england",    price:38, old:null, badge:null, color:"#fff",    bg:"linear-gradient(135deg,#0a0a1a,#1a0000)", legend:"cr7"},
+  {id:4, name:"Man. United",      era:"1999-00", type:"Home", league:"england",    price:40, old:null, badge:null, color:"#c00",    bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"cr7"},
+  {id:5, name:"FC Barcelona",     era:"2011-12", type:"Home", league:"españa",     price:40, old:58,  badge:"HOT", color:"#a50044", bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
+  {id:6, name:"FC Barcelona",     era:"2009-10", type:"Home", league:"españa",     price:38, old:55,  badge:"HOT", color:"#a50044", bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
+  {id:7, name:"FC Barcelona",     era:"2008-09", type:"Home", league:"españa",     price:38, old:null, badge:"NEW", color:"#a50044",bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"triplete"},
+  {id:8, name:"FC Barcelona",     era:"2008-09", type:"Away", league:"españa",     price:38, old:null, badge:null, color:"#f5c518",bg:"linear-gradient(135deg,#1a1200,#2a1800)", legend:"triplete"},
+  {id:9, name:"FC Barcelona",     era:"1998-99", type:"Home", league:"españa",     price:38, old:null, badge:null, color:"#a50044",bg:"linear-gradient(135deg,#060024,#001a4a)", legend:"messi"},
+  {id:10,name:"España",           era:"2010",    type:"Home", league:"selecciones",price:40, old:55,  badge:"HOT", color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"iniesta"},
+  {id:11,name:"España",           era:"2008",    type:"Home", league:"selecciones",price:38, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:"iniesta"},
+  {id:12,name:"Liverpool FC",     era:"2004-05", type:"Home", league:"england",    price:40, old:58,  badge:"HOT", color:"#cc0000",bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:null},
+  {id:13,name:"Ajax Amsterdam",   era:"1994-95", type:"Home", league:"europa",     price:38, old:null, badge:"HOT", color:"#fff",  bg:"linear-gradient(135deg,#1a0505,#300000)", legend:null},
+  {id:14,name:"Brasil",           era:"2002",    type:"Home", league:"selecciones",price:40, old:55,  badge:"HOT", color:"#f5c518",bg:"linear-gradient(135deg,#0a1a0a,#001a00)", legend:null},
+  {id:15,name:"Atlético Madrid",  era:"1995-96", type:"Home", league:"españa",     price:38, old:null, badge:"NEW", color:"#c0392b",bg:"linear-gradient(135deg,#1a0000,#300000)",legend:null},
+  {id:16,name:"Real Zaragoza",    era:"1993-94", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#001a3a,#000d2a)", legend:null},
+  {id:17,name:"AS Roma",          era:"2001-02", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#8b1a1a",bg:"linear-gradient(135deg,#1a0505,#2a0000)", legend:null},
+  {id:18,name:"O. Marseille",     era:"1992-93", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#0a1a2a,#051020)", legend:null},
+  {id:19,name:"Celtic FC",        era:"2002-03", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#1e7a1e",bg:"linear-gradient(135deg,#0a1a0a,#051005)", legend:null},
+  {id:20,name:"PSV Eindhoven",    era:"1988-89", type:"Home", league:"europa",     price:38, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0000,#3d0000)", legend:null},
+  {id:21,name:"Boca Juniors",     era:"2001-02", type:"Home", league:"sudamerica", price:38, old:null, badge:null, color:"#0038a8",bg:"linear-gradient(135deg,#000a2a,#001550)", legend:null},
+  {id:22,name:"River Plate",      era:"1996-97", type:"Home", league:"sudamerica", price:38, old:null, badge:null, color:"#fff",   bg:"linear-gradient(135deg,#1a1a1a,#0d0d0d)", legend:null},
+  {id:23,name:"Man. United",      era:"1996-97", type:"Away", league:"england",    price:38, old:null, badge:"NEW", color:"#fff",  bg:"linear-gradient(135deg,#0a0a1a,#1a0000)", legend:"cr7"},
+  {id:24,name:"Crystal Palace",   era:"1991-92", type:"Home", league:"england",    price:35, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#050a1a,#0a0014)", legend:null},
+  {id:25,name:"England",          era:"1982",    type:"Home", league:"selecciones",price:40, old:null, badge:"NEW", color:"#fff",  bg:"linear-gradient(135deg,#0a0a1a,#00001a)", legend:null},
+  {id:26,name:"Sporting Gijón",   era:"1999-00", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#c00",   bg:"linear-gradient(135deg,#1a0505,#300000)", legend:null},
+  {id:27,name:"Málaga CF",        era:"2001-02", type:"Home", league:"españa",     price:35, old:null, badge:null, color:"#003087",bg:"linear-gradient(135deg,#001a3a,#000d2a)", legend:null},
+];
+
+// Jerseys asociados a cada leyenda
+const LEGEND_PRODUCTS = {
+  cr7:     [2,4,3],
+  messi:   [5,6,9],
+  iniesta: [10,11],
+  triplete:[7,8],
+};
+
+// ════════════════════════════
+// JERSEY SVG RENDER
+// ════════════════════════════
+function jersey(p, size=100, h=120){
+  return `<div style="width:100%;height:100%;background:${p.bg};display:flex;align-items:center;justify-content:center">
+    <svg width="${size}" height="${h}" viewBox="0 0 100 120" style="filter:drop-shadow(0 6px 20px rgba(0,0,0,.5))">
+      <defs>
+        <linearGradient id="jg${p.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${p.color}" stop-opacity="1"/>
+          <stop offset="100%" stop-color="${p.color}" stop-opacity=".7"/>
+        </linearGradient>
+      </defs>
+      <path d="M32 10L14 32l12 6-4 50h56l-4-50 12-6L68 10C66 17 52 21 50 21c-2 0-16-4-18-11z"
+            fill="url(#jg${p.id})" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>
+      <circle cx="50" cy="44" r="7" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="1"/>
+      <text x="50" y="47" text-anchor="middle" font-size="5" fill="rgba(255,255,255,.25)" font-family="sans-serif">${p.era}</text>
+    </svg>
+  </div>`;
+}
+
+// ════════════════════════════
+// LEGEND JERSEY CARDS
+// ════════════════════════════
+function buildLegendCards(){
+  Object.entries(LEGEND_PRODUCTS).forEach(([key, ids]) => {
+    const el = document.getElementById(key+'jerseys');
+    if(!el) return;
+    el.innerHTML = ids.map(id => {
+      const p = PRODUCTS.find(x=>x.id===id);
+      if(!p) return '';
+      return `<div class="lj-card" onclick="addCart(${p.id})">
+        <div style="height:80px;margin-bottom:8px">${jersey(p,60,72)}</div>
+        <div class="lj-name">${p.name}</div>
+        <div class="lj-era">${p.era} · ${p.type}</div>
+        <div class="lj-price">${p.old?`<del style="font-size:12px;color:#555">${p.old}€</del> `:''}${p.price}€</div>
+      </div>`;
+    }).join('');
+  });
+}
+
+// ════════════════════════════
+// PRODUCT GRID
+// ════════════════════════════
+let currentFilter = 'all';
+function renderGrid(filter='all'){
+  currentFilter = filter;
+  const g = document.getElementById('pgrid');
+  const list = filter==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.league===filter);
+  g.innerHTML = list.map(p => {
+    const bHtml = p.badge ? `<div class="pc-badge ${p.badge==='HOT'?'pb-hot':'pb-new'}">${p.badge}</div>` : '';
+    const priceHtml = p.old ? `<del>${p.old}€</del> <span>${p.price}€</span>` : `<span>${p.price}€</span>`;
+    return `<div class="pc">
+      ${bHtml}
+      <div class="pc-img">
+        <div class="pc-jersey">${jersey(p)}</div>
+        <div class="pc-hover">
+          <button class="pc-add" onclick="addCart(${p.id},event)">+ Añadir al Carrito</button>
+        </div>
+      </div>
+      <div class="pc-info">
+        <div class="pc-era">${p.era}</div>
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-type">${p.type}</div>
+        <div class="pc-foot">
+          <div class="pc-price">${priceHtml}</div>
+          <div class="pcsz"><div class="sz">S</div><div class="sz">M</div><div class="sz">L</div><div class="sz">XL</div></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterProd(f, btn){
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  if(btn){ btn.classList.add('on'); }
+  else {
+    const match = document.getElementById('fb-'+f);
+    document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+    if(match) match.classList.add('on');
+    else document.querySelector('.fb').classList.add('on');
+  }
+  renderGrid(f);
+  document.getElementById('catalogo').scrollIntoView({behavior:'smooth'});
+}
+
+// ════════════════════════════
+// HERO VIDEO ROTATION
+// ════════════════════════════
+const heroVids  = document.querySelectorAll('#heroVids video');
+const heroDots  = document.querySelectorAll('.hero-dot');
+const vidLabels = document.querySelectorAll('.vid-label');
+let heroIdx = 0, heroTimer;
+
+function playVid(v){
+  v.play().catch(err => {
+    // Si autoplay bloqueado, reintentar tras interacción
+    document.addEventListener('click', () => v.play().catch(()=>{}), { once: true });
+    document.addEventListener('touchstart', () => v.play().catch(()=>{}), { once: true });
+  });
+}
+
+function switchHeroVid(idx){
+  heroVids[heroIdx].classList.remove('active');
+  heroVids[heroIdx].pause();
+  heroDots[heroIdx].classList.remove('on');
+  vidLabels[heroIdx].classList.remove('on');
+  heroIdx = idx;
+  heroVids[heroIdx].classList.add('active');
+  playVid(heroVids[heroIdx]);
+  heroDots[heroIdx].classList.add('on');
+  vidLabels[heroIdx].classList.add('on');
+  clearInterval(heroTimer);
+  heroTimer = setInterval(() => switchHeroVid((heroIdx + 1) % heroVids.length), 9000);
+}
+
+// Iniciar hero — primer vídeo visible inmediatamente
+heroVids[0].classList.add('active');
+playVid(heroVids[0]);
+heroTimer = setInterval(() => switchHeroVid((heroIdx + 1) % heroVids.length), 9000);
+
+// ════════════════════════════
+// LEGEND SECTION VIDEO — IntersectionObserver
+// ════════════════════════════
+const legendSections = document.querySelectorAll('.vid-section[data-vid]');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const sec = entry.target;
+    const vid = sec.querySelector('video');
+    if (!vid) return;
+
+    if (entry.isIntersecting) {
+      sec.classList.add('active');
+      // Asignar src si aún no se ha hecho
+      if (!vid.getAttribute('src')) {
+        vid.setAttribute('src', sec.dataset.vid);
+        vid.load();
+        vid.addEventListener('canplay', () => playVid(vid), { once: true });
+      } else {
+        playVid(vid);
+      }
+    } else {
+      sec.classList.remove('active');
+      vid.pause();
+    }
+  });
+}, { threshold: 0.35, rootMargin: '0px 0px -10% 0px' });
+
+legendSections.forEach(s => observer.observe(s));
+
+// ════════════════════════════
+// SOUND TOGGLE
+// ════════════════════════════
+let soundOn = false;
+function toggleSound(){
+  soundOn = !soundOn;
+  document.querySelectorAll('video').forEach(v => v.muted = !soundOn);
+  document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+}
+
+// ════════════════════════════
+// NAV SCROLL
+// ════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ════════════════════════════
+// CUSTOM CURSOR
+// ════════════════════════════
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+});
+
+// ════════════════════════════
+// CART
+// ════════════════════════════
+let cart = [];
+function toggleCart(){
+  const m=document.getElementById('cartMask'), p=document.getElementById('cartPanel');
+  m.classList.toggle('on'); p.classList.toggle('on');
+  document.body.style.overflow = p.classList.contains('on') ? 'hidden' : '';
+}
+function addCart(id, e){
+  if(e) e.stopPropagation();
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  const ex = cart.find(c=>c.id===id);
+  if(ex) ex.qty++; else cart.push({...p, qty:1});
+  updateCart();
+  showToast(`✓ ${p.name} ${p.era}`);
+}
+function updateCart(){
+  const cnt = cart.reduce((a,c)=>a+c.qty, 0);
+  document.getElementById('cartCount').textContent = cnt;
+  const body = document.getElementById('cartBody');
+  const foot = document.getElementById('cartFoot');
+  if(!cart.length){
+    body.innerHTML = '<div class="cart-empty"><span class="ce-ico">⚽</span><p class="ce-txt">Carrito vacío</p></div>';
+    foot.style.display = 'none'; return;
+  }
+  body.innerHTML = cart.map(c=>`
+    <div class="cart-item">
+      <div class="ci-img">${jersey(c,50,64)}</div>
+      <div class="ci-info">
+        <div class="ci-name">${c.name}</div>
+        <div class="ci-meta">${c.era} · ${c.type}</div>
+        <div class="ci-ctrl">
+          <button class="qb" onclick="chgQty(${c.id},-1)">−</button>
+          <span class="qn">${c.qty}</span>
+          <button class="qb" onclick="chgQty(${c.id},1)">+</button>
+          <button class="ci-rm" onclick="rmItem(${c.id})">✕</button>
+        </div>
+      </div>
+      <div class="ci-price">${c.price*c.qty}€</div>
+    </div>`).join('');
+  const total = cart.reduce((a,c)=>a+c.price*c.qty, 0);
+  document.getElementById('cartTotal').textContent = total+'€';
+  foot.style.display = 'block';
+}
+function chgQty(id,d){ const i=cart.findIndex(c=>c.id===id); if(i<0)return; cart[i].qty+=d; if(cart[i].qty<=0)cart.splice(i,1); updateCart(); }
+function rmItem(id){ cart=cart.filter(c=>c.id!==id); updateCart(); }
+
+// ════════════════════════════
+// TOAST
+// ════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ════════════════════════════
+// NEWSLETTER
+// ════════════════════════════
+function nlSub(e){ e.preventDefault(); showToast('✓ ¡Bienvenido a las Leyendas!'); e.target.reset(); return false; }
+
+// ════════════════════════════
+// LOADER
+// ════════════════════════════
+window.addEventListener('load', () => {
+  const fill = document.getElementById('loaderFill');
+  setTimeout(()=>{ fill.style.width='100%'; }, 100);
+  setTimeout(()=>{ document.getElementById('loader').classList.add('gone'); }, 2200);
+});
+
+// ════════════════════════════
+// INIT
+// ════════════════════════════
+renderGrid();
+buildLegendCards();
+</script>
+</body>
+</html>
