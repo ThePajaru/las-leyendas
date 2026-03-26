@@ -235,25 +235,117 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
 .toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,80px);background:var(--gold);color:var(--ink);font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 28px;z-index:300;opacity:0;transition:.35s cubic-bezier(.4,0,.2,1);white-space:nowrap}
 .toast.show{transform:translate(-50%,0);opacity:1}
 
+/* ── SOUND HINT (Iniesta) ── */
+.sound-hint{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:4;background:rgba(0,0,0,.55);border:1px solid rgba(212,160,23,.5);color:var(--gold);font-family:var(--fb);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:10px 22px;cursor:pointer;backdrop-filter:blur(8px);transition:.3s;white-space:nowrap;animation:soundPulse 2.5s ease-in-out infinite}
+.sound-hint:hover{background:rgba(212,160,23,.15);border-color:var(--gold)}
+.sound-hint.hidden{display:none}
+@keyframes soundPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,160,23,.4)}50%{box-shadow:0 0 0 8px rgba(212,160,23,0)}}
+@media(max-width:900px){.sound-hint{font-size:11px;padding:9px 18px;bottom:80px}}
+
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
-  nav{padding:0 20px}
+  /* Nav */
+  nav{padding:0 16px;height:56px}
+  .nav-logo-main{font-size:17px;letter-spacing:3px}
+  .nav-logo-sub{display:none}
   .nav-links{display:none}
-  .vid-content{padding:0 20px}
-  .vid-name{font-size:clamp(50px,12vw,90px)}
-  .vid-quote{font-size:15px}
-  .legend-jerseys{display:none}
-  .prod-section{padding:60px 20px}
+  .sound-btn{width:36px;height:36px;font-size:15px}
+  .nav-cart{padding:8px 14px;font-size:10px;letter-spacing:2px}
+  button,a,.fb,.sz,.hero-dot,.vid-label,.lj-card,.pc-add,.qb,.ci-rm,.cart-x,.sound-btn,.nav-cart{cursor:pointer}
+
+  /* Hero */
+  .hero-content,.vid-content{padding:0 20px}
+  .hero-pretext{font-size:14px;margin-bottom:8px}
+  .hero-sub{font-size:14px;margin:14px auto 22px;max-width:360px}
+  .hero-dots{margin-top:14px}
+  .vid-labels{bottom:76px;gap:3px;padding:0 12px}
+  .vid-label{font-size:10px;padding:5px 10px;letter-spacing:1px}
+
+  /* Video sections */
+  .vid-name{font-size:clamp(52px,13vw,100px)}
+  .vid-quote{font-size:14px;margin-top:12px}
+  .vid-cta{margin-top:18px;gap:8px}
+  .btn-light,.btn-ghost-light{padding:12px 24px;font-size:11px}
+  .era-badge{top:66px;right:14px;padding:7px 12px}
+  .era-badge-yr{font-size:22px}
+  .era-badge-lbl{font-size:9px}
+  .vid-number{font-size:clamp(130px,32vw,240px)}
+  .scroll-ind{bottom:18px}
+
+  /* Legend jerseys – scroll horizontal en móvil */
+  .legend-jerseys{display:flex;overflow-x:auto;justify-content:flex-start;gap:10px;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .legend-jerseys::-webkit-scrollbar{display:none}
+  .lj-card{min-width:108px;flex-shrink:0}
+
+  /* Products */
+  .prod-section{padding:48px 14px}
+  .prod-sec-hd{margin-bottom:30px}
+  .filter-bar{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;padding-bottom:8px;margin-bottom:24px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .fb{white-space:nowrap;flex-shrink:0}
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  /* Añadir al carrito visible siempre en móvil */
+  .pc-hover{position:static;background:transparent;opacity:1;display:block;height:auto;inset:auto}
+  .pc-add{width:calc(100% - 20px);margin:4px 10px 12px;display:block;text-align:center;padding:11px 10px}
+
+  /* Trust */
+  .trust-sec{padding:40px 14px}
   .trust-grid{grid-template-columns:repeat(2,1fr)}
-  footer{padding:48px 20px}
+
+  /* Newsletter */
+  .nl-sec{padding:56px 20px}
+  .nl-form{flex-direction:column;max-width:340px}
+  .nl-inp{border-right:1px solid rgba(255,255,255,.1);border-bottom:none}
+  .nl-btn{width:100%;padding:13px}
+
+  /* Footer */
+  footer{padding:40px 16px 24px}
   .fg{grid-template-columns:1fr 1fr}
+
+  /* Cart */
   .cart-panel{width:100%}
+
+  /* Cursor off */
   body{cursor:auto}
   .cursor{display:none}
 }
+
 @media(max-width:520px){
+  nav{height:52px}
+  .nav-logo-main{font-size:15px;letter-spacing:2px}
+  .nav-cart span:first-of-type{display:none}
+
+  .hero-title{font-size:clamp(50px,15vw,78px)}
+  .hero-pretext{font-size:12px}
+  .hero-sub{font-size:13px}
+  .vid-labels{display:none}
+  .hero-dots{gap:5px}
+
+  .vid-name{font-size:clamp(46px,15vw,76px)}
+  .vid-quote{font-size:13px;line-height:1.5}
+  .vid-eyebrow span{font-size:10px;letter-spacing:3px}
+  .vid-cta{flex-direction:column;align-items:center}
+  .btn-light,.btn-ghost-light{width:100%;max-width:260px;text-align:center;box-sizing:border-box}
+  .era-badge{display:none}
+
+  .sec-tit{font-size:clamp(30px,9vw,48px)}
+  .pgrid{grid-template-columns:repeat(2,1fr)}
+  .lj-card{min-width:96px}
+
+  .trust-grid{grid-template-columns:1fr 1fr}
+  .ti{padding:20px 12px}
+  .ti-icon{font-size:26px}
+  .ti-title{font-size:14px}
+
+  .fg{grid-template-columns:1fr}
+  footer .fbot{flex-direction:column;gap:6px}
+}
+
+@media(max-width:375px){
+  .hero-title{font-size:clamp(42px,14vw,64px)}
+  .vid-name{font-size:clamp(40px,14vw,62px)}
   .pgrid{grid-template-columns:1fr}
-  .hero-title{font-size:clamp(56px,14vw,90px)}
+  .trust-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -403,7 +495,7 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
      INIESTA — ESPAÑA 2010
 ══════════════════════════════════════ -->
 <section class="vid-section" id="iniesta" data-vid="videos%20pagina%20web/iniesta%20mundial%202010.mp4">
-  <video muted playsinline loop preload="none"></video>
+  <video id="iniesta-vid" muted playsinline loop preload="none"></video>
   <div class="vid-overlay" style="background:linear-gradient(135deg,rgba(192,0,0,.35) 0%,rgba(6,6,6,.65) 50%,rgba(6,6,6,.85) 100%)"></div>
   <div class="era-badge"><div class="era-badge-yr">8</div><div class="era-badge-lbl">España · Mundial 2010</div></div>
   <div class="vid-number">8</div>
@@ -417,6 +509,7 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
     </div>
     <div class="legend-jerseys" id="iniestajerseys"></div>
   </div>
+  <div class="sound-hint hidden" id="soundHint" onclick="activateIniestaSound()">🔊 Toca para escuchar el gol</div>
   <div class="scroll-ind"><span>Siguiente</span><div class="scroll-dot"></div></div>
 </section>
 
@@ -691,7 +784,6 @@ const observer = new IntersectionObserver((entries) => {
 
     if (entry.isIntersecting) {
       sec.classList.add('active');
-      // Asignar src si aún no se ha hecho
       if (!vid.getAttribute('src')) {
         vid.setAttribute('src', sec.dataset.vid);
         vid.load();
@@ -699,9 +791,21 @@ const observer = new IntersectionObserver((entries) => {
       } else {
         playVid(vid);
       }
+      // Iniesta: aplicar estado de sonido actual
+      if (sec.id === 'iniesta') {
+        vid.muted = !soundOn;
+        if (!soundOn) document.getElementById('soundHint').classList.remove('hidden');
+      }
     } else {
       sec.classList.remove('active');
       vid.pause();
+      // Iniesta: mutear al salir
+      if (sec.id === 'iniesta') {
+        vid.muted = true;
+        soundOn = false;
+        document.getElementById('soundBtn').textContent = '🔇';
+        document.getElementById('soundHint').classList.remove('hidden');
+      }
     }
   });
 }, { threshold: 0.35, rootMargin: '0px 0px -10% 0px' });
@@ -709,13 +813,23 @@ const observer = new IntersectionObserver((entries) => {
 legendSections.forEach(s => observer.observe(s));
 
 // ════════════════════════════
-// SOUND TOGGLE
+// SOUND — solo Iniesta
 // ════════════════════════════
 let soundOn = false;
+function getIniestaVid(){ return document.getElementById('iniesta-vid'); }
 function toggleSound(){
   soundOn = !soundOn;
-  document.querySelectorAll('video').forEach(v => v.muted = !soundOn);
+  const v = getIniestaVid();
+  if(v) v.muted = !soundOn;
   document.getElementById('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  if(soundOn){ document.getElementById('soundHint').classList.add('hidden'); }
+}
+function activateIniestaSound(){
+  soundOn = true;
+  const v = getIniestaVid();
+  if(v){ v.muted = false; playVid(v); }
+  document.getElementById('soundBtn').textContent = '🔊';
+  document.getElementById('soundHint').classList.add('hidden');
 }
 
 // ════════════════════════════
