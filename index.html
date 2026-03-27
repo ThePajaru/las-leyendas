@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"/>
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>LAS LEYENDAS — Camisetas Retro del Fútbol Eterno</title>
 <meta name="description" content="CR7 en el United. Messi en el Barça. Iniesta en Johannesburgo. Viste la historia del fútbol más grande."/>
@@ -546,13 +547,17 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
   </div>
   <div class="filter-bar">
     <button class="fb on" onclick="filterProd('all',this)">Todas</button>
-    <button class="fb" id="fb-españa" onclick="filterProd('españa',this)">España</button>
-    <button class="fb" id="fb-england" onclick="filterProd('england',this)">Inglaterra</button>
-    <button class="fb" id="fb-europa" onclick="filterProd('europa',this)">Europa</button>
-    <button class="fb" id="fb-sudamerica" onclick="filterProd('sudamerica',this)">Sudamérica</button>
-    <button class="fb" id="fb-selecciones" onclick="filterProd('selecciones',this)">Selecciones</button>
+    <button class="fb" id="fb-esp" onclick="filterProd('esp',this)">España</button>
+    <button class="fb" id="fb-eng" onclick="filterProd('eng',this)">Inglaterra</button>
+    <button class="fb" id="fb-eur" onclick="filterProd('eur',this)">Europa</button>
+    <button class="fb" id="fb-sud" onclick="filterProd('sud',this)">Sudamérica</button>
+    <button class="fb" id="fb-sel" onclick="filterProd('sel',this)">Selecciones</button>
   </div>
   <div class="pgrid" id="pgrid"></div>
+  <div style="text-align:center;margin-top:40px">
+    <button id="loadMoreBtn" class="btn-ghost-light" onclick="loadMore()" style="display:none">Ver más camisetas</button>
+    <div id="prodCount" style="margin-top:12px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);opacity:.6"></div>
+  </div>
 </section>
 
 <!-- TRUST -->
@@ -615,62 +620,175 @@ footer{background:var(--ink);border-top:1px solid rgba(255,255,255,.04);padding:
 // DATA
 // ════════════════════════════
 const PRODUCTS = [
-  // REAL MADRID
-  {id:1,  name:"Real Madrid",     era:"11-12", type:"Local",        league:"españa",     price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/d3956ea2/medium.jpg", legend:"cr7"},
-  {id:2,  name:"Real Madrid",     era:"05-06", type:"2ª Visitante", league:"españa",     price:38, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/0457ba6a/medium.jpg"},
-  {id:3,  name:"Real Madrid",     era:"96-97", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/72ccff42/medium.jpg"},
-  {id:4,  name:"Real Madrid",     era:"94-96", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/75e7bb02/medium.jpg"},
-  {id:5,  name:"Real Madrid",     era:"13-14", type:"Visitante",    league:"españa",     price:38, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/399747da/medium.jpg"},
-  {id:6,  name:"Real Madrid",     era:"07-08", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/88f5f395/medium.jpg", legend:"cr7"},
-  {id:7,  name:"Real Madrid",     era:"03-04", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/1dcd1c03/medium.jpg"},
-  // FC BARCELONA
-  {id:8,  name:"FC Barcelona",    era:"11-12", type:"Local",        league:"españa",     price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/009d629e/medium.jpg", legend:"messi"},
-  {id:9,  name:"FC Barcelona",    era:"09-10", type:"Local",        league:"españa",     price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/5c77fcb4/medium.jpg", legend:"triplete"},
-  {id:10, name:"FC Barcelona",    era:"08-09", type:"Local",        league:"españa",     price:38, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/b31ba608/medium.jpg", legend:"triplete"},
-  {id:11, name:"FC Barcelona",    era:"05-06", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/66fc2807/medium.jpg", legend:"messi"},
-  {id:12, name:"FC Barcelona",    era:"98-99", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4ab0b23a/medium.jpg"},
-  {id:13, name:"FC Barcelona",    era:"96-97", type:"Manga Larga",  league:"españa",     price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/655300ae/medium.jpg"},
-  // ATLÉTICO MADRID
-  {id:14, name:"Atlético Madrid", era:"98-99", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3eeff190/medium.jpg"},
-  {id:15, name:"Atlético Madrid", era:"13-14", type:"Local",        league:"españa",     price:38, old:null, badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/b36d74bf/medium.jpg"},
-  // SEVILLA
-  {id:16, name:"Sevilla FC",      era:"94-96", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4de6b415/medium.jpg"},
-  {id:17, name:"Sevilla FC",      era:"92-93", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/d93e67f9/medium.jpg"},
-  {id:18, name:"Sevilla FC",      era:"91-92", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3b445116/medium.jpg"},
-  // OTRAS ESPAÑOLAS
-  {id:19, name:"Athletic Bilbao", era:"97-98", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/3b7cc9b9/medium.jpg"},
-  {id:20, name:"Valencia CF",     era:"99-00", type:"Local",        league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/dbef3984/medium.jpg"},
-  {id:21, name:"Real Betis",      era:"96-97", type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/0966e885/medium.jpg"},
-  {id:22, name:"Dep. La Coruña",  era:"99-00", type:"Visitante",    league:"españa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/4f2516ae/medium.jpg"},
-  {id:23, name:"Real Zaragoza",   era:"1984",  type:"Visitante",    league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/e0a350f5/medium.png"},
-  {id:24, name:"Oviedo",          era:"95",    type:"Local",        league:"españa",     price:35, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/65298412/medium.png"},
-  // ENGLAND
-  {id:25, name:"Man. United",     era:"05-06", type:"Visitante",    league:"england",    price:40, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/75013b7f/medium.jpg", legend:"cr7"},
-  {id:26, name:"Man. United",     era:"92-94", type:"Visitante ML", league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/d193cf97/medium.jpg"},
-  {id:27, name:"Liverpool FC",    era:"04-05", type:"Visitante",    league:"england",    price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/7500aa41/medium.jpg"},
-  {id:28, name:"Tottenham",       era:"1986",  type:"Local",        league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/7e9a0bbc/medium.jpg"},
-  {id:29, name:"Arsenal",         era:"91-93", type:"Visitante",    league:"england",    price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/8f18a5fc/medium.jpg"},
-  // SELECCIONES
-  {id:30, name:"España",          era:"2010",  type:"Local",        league:"selecciones",price:42, old:58,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/0a1183ae/medium.jpg", legend:"iniesta"},
-  {id:31, name:"España",          era:"98-99", type:"Local",        league:"selecciones",price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/575f7fb1/medium.jpg", legend:"iniesta"},
-  {id:32, name:"España",          era:"2010",  type:"Portero",      league:"selecciones",price:40, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/f904f488/medium.jpg"},
-  {id:33, name:"England",         era:"1982",  type:"Local",        league:"selecciones",price:40, old:null, badge:"NEW", img:"https://photo.yupoo.com/youlooking_v/c8871a4e/medium.jpg"},
-  {id:34, name:"Brasil",          era:"2014",  type:"Visitante",    league:"selecciones",price:40, old:55,  badge:"HOT", img:"https://photo.yupoo.com/youlooking_v/b6d96823/medium.jpg"},
-  {id:35, name:"Argentina",       era:"06-07", type:"Local ML",     league:"selecciones",price:40, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/afbc8962/medium.jpg"},
-  // EUROPA
-  {id:36, name:"Inter Milan",     era:"09-10", type:"Local ML",     league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/25425ae8/medium.jpg"},
-  {id:37, name:"Fenerbahçe",      era:"08-09", type:"Local",        league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/6de58af4/medium.jpg"},
-  {id:38, name:"Fenerbahçe",      era:"07-08", type:"Visitante",    league:"europa",     price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/f201fd99/medium.jpg"},
-  // SUDAMÉRICA
-  {id:39, name:"Santos FC",       era:"12-13", type:"Local ML",     league:"sudamerica", price:38, old:null, badge:null,  img:"https://photo.yupoo.com/youlooking_v/28511808/medium.jpg"},
+  { id:1, name: "Rayo Vallecano 97-98 Home", img: "https://photo.yupoo.com/youlooking_v/e7b9c937/medium.jpg", cat: "esp", era: "1997", price: 38, stock: 4, color:"#1a0505" },
+  { id:2, name: "Atletico Madrid 10-11 Away", img: "https://photo.yupoo.com/youlooking_v/63cea382/medium.jpg", cat: "esp", era: "2010", price: 38, stock: 9, color:"#0a0a0a" },
+  { id:3, name: "Atletico Madrid 16-17 Home", img: "https://photo.yupoo.com/youlooking_v/c65708bd/medium.jpg", cat: "esp", era: "2016", price: 38, stock: 7, color:"#1a0505" },
+  { id:4, name: "Tenerife 98-99 Away", img: "https://photo.yupoo.com/youlooking_v/7f48cbcb/medium.jpg", cat: "esp", era: "1998", price: 38, stock: 5, color:"#0a0a1a" },
+  { id:5, name: "Murcia 99-01 Home Red", img: "https://photo.yupoo.com/youlooking_v/b7bd57db/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 8, color:"#1a0505" },
+  { id:6, name: "Granada 05-06 Home", img: "https://photo.yupoo.com/youlooking_v/8558cf0a/medium.jpg", cat: "esp", era: "2005", price: 38, stock: 2, color:"#1a0505" },
+  { id:7, name: "Atletico Madrid 02-03 Home", img: "https://photo.yupoo.com/youlooking_v/4df73d7f/medium.jpg", cat: "esp", era: "2002", price: 38, stock: 10,color:"#1a0505" },
+  { id:8, name: "Atletico Madrid 82-83 Home", img: "https://photo.yupoo.com/youlooking_v/16f08591/medium.jpg", cat: "esp", era: "1982", price: 38, stock: 6, color:"#1a0505" },
+  { id:9, name: "Mallorca 96-97 Home", img: "https://photo.yupoo.com/youlooking_v/48515939/medium.jpg", cat: "esp", era: "1996", price: 38, stock: 3, color:"#1a0505" },
+  { id:10, name: "Sporting Gijon 94-95 Home", img: "https://photo.yupoo.com/youlooking_v/7f0bcfa0/medium.jpg", cat: "esp", era: "1994", price: 38, stock: 7, color:"#1a0505" },
+  { id:11, name: "Atletico Madrid 02-03 Away", img: "https://photo.yupoo.com/youlooking_v/706416d7/medium.jpg", cat: "esp", era: "2002", price: 38, stock: 5, color:"#050505" },
+  { id:12, name: "Cologne 96-97 Home", img: "https://photo.yupoo.com/youlooking_v/89f4f3f6/medium.jpg", cat: "eur", era: "1996", price: 38, stock: 9, color:"#151515" },
+  { id:13, name: "Sheffield Wednesday 94-95 Home", img: "https://photo.yupoo.com/youlooking_v/fb016bce/medium.jpg", cat: "eng", era: "1994", price: 38, stock: 2, color:"#0a0518" },
+  { id:14, name: "Deportivo La Coruna 94-95 Home", img: "https://photo.yupoo.com/youlooking_v/3c676b7e/medium.jpg", cat: "esp", era: "1994", price: 38, stock: 6, color:"#0a0a2a" },
+  { id:15, name: "Marseille 98-99 Home", img: "https://photo.yupoo.com/youlooking_v/20bd3f6e/medium.jpg", cat: "eur", era: "1998", price: 38, stock: 4, color:"#101010" },
+  { id:16, name: "Marseille 98-99 Away", img: "https://photo.yupoo.com/youlooking_v/d214b247/medium.jpg", cat: "eur", era: "1998", price: 38, stock: 8, color:"#0a0a2a" },
+  { id:17, name: "River Plate 98-99 Home", img: "https://photo.yupoo.com/youlooking_v/2d035f26/medium.jpg", cat: "sud", era: "1998", price: 38, stock: 7, color:"#150505" },
+  { id:18, name: "Scotland 96-98 Home", img: "https://photo.yupoo.com/youlooking_v/0ca34839/medium.jpg", cat: "sel", era: "1996", price: 38, stock: 5, color:"#050a1a" },
+  { id:19, name: "Marseille 96-97 Home", img: "https://photo.yupoo.com/youlooking_v/f64f538d/medium.jpg", cat: "eur", era: "1996", price: 38, stock: 9, color:"#101010" },
+  { id:20, name: "River Plate 96-97 Home", img: "https://photo.yupoo.com/youlooking_v/b7f994fa/medium.jpg", cat: "sud", era: "1996", price: 38, stock: 6, color:"#1a0a1a" },
+  { id:21, name: "Scotland 95-96 Away", img: "https://photo.yupoo.com/youlooking_v/e04bc2c3/medium.jpg", cat: "sel", era: "1995", price: 38, stock: 4, color:"#1a0a1a" },
+  { id:22, name: "PSV 95-96 Home", img: "https://photo.yupoo.com/youlooking_v/39a8abe1/medium.jpg", cat: "eur", era: "1995", price: 38, stock: 8, color:"#1a0000" },
+  { id:23, name: "PSV 95-96 Away", img: "https://photo.yupoo.com/youlooking_v/39fddf9a/medium.jpg", cat: "eur", era: "1995", price: 38, stock: 7 },
+  { id:24, name: "Ajax 95-96 Away", img: "https://photo.yupoo.com/youlooking_v/25ceed93/medium.jpg", cat: "eur", era: "1995", price: 38, stock: 9 },
+  { id:25, name: "Celtic 93-95 Home", img: "https://photo.yupoo.com/youlooking_v/66839d25/medium.jpg", cat: "eur", era: "1993", price: 38, stock: 5 },
+  { id:26, name: "River Plate 92-94 Home", img: "https://photo.yupoo.com/youlooking_v/f91aaf75/medium.jpg", cat: "sud", era: "1992", price: 38, stock: 2 },
+  { id:27, name: "Inter Milan 91-92 Away", img: "https://photo.yupoo.com/youlooking_v/4ba42e77/medium.jpg", cat: "eur", era: "1991", price: 38, stock: 10},
+  { id:28, name: "Inter Milan 91-92 Third", img: "https://photo.yupoo.com/youlooking_v/18573581/medium.jpg", cat: "eur", era: "1991", price: 38, stock: 6 },
+  { id:29, name: "France 90-91 Home", img: "https://photo.yupoo.com/youlooking_v/17000a61/medium.jpg", cat: "sel", era: "1990", price: 38, stock: 4 },
+  { id:30, name: "Real Madrid 05-06 Third", img: "https://photo.yupoo.com/youlooking_v/0457ba6a/medium.jpg", cat: "esp", era: "2005", price: 38, stock: 8 },
+  { id:31, name: "Manchester United 05-06 Away", img: "https://photo.yupoo.com/youlooking_v/75013b7f/medium.jpg", cat: "eng", era: "2005", price: 38, stock: 7 },
+  { id:32, name: "Liverpool 04-05 Away", img: "https://photo.yupoo.com/youlooking_v/7500aa41/medium.jpg", cat: "eng", era: "2004", price: 38, stock: 3 },
+  { id:33, name: "England 1982 Home", img: "https://photo.yupoo.com/youlooking_v/c8871a4e/medium.jpg", cat: "sel", era: "1982", price: 38, stock: 9 },
+  { id:34, name: "Tottenham 1986 Home", img: "https://photo.yupoo.com/youlooking_v/7e9a0bbc/medium.jpg", cat: "eng", era: "1986", price: 38, stock: 5 },
+  { id:35, name: "Brazil 2014 Away", img: "https://photo.yupoo.com/youlooking_v/b6d96823/medium.jpg", cat: "sel", era: "2014", price: 38, stock: 8 },
+  { id:36, name: "Las Palmas 00-01 Home", img: "https://photo.yupoo.com/youlooking_v/112cfd68/medium.jpg", cat: "esp", era: "2000", price: 38, stock: 6 },
+  { id:37, name: "Malaga 2013 Third", img: "https://photo.yupoo.com/youlooking_v/19beb3d3/medium.jpg", cat: "esp", era: "2013", price: 38, stock: 2 },
+  { id:38, name: "Zaragoza 1984 Away", img: "https://photo.yupoo.com/youlooking_v/e0a350f5/medium.jpg", cat: "esp", era: "1984", price: 38, stock: 4 },
+  { id:39, name: "Oviedo 1995 Home", img: "https://photo.yupoo.com/youlooking_v/65298412/medium.jpg", cat: "esp", era: "1995", price: 38, stock: 3 },
+  { id:40, name: "Celta 03-04 Home", img: "https://photo.yupoo.com/youlooking_v/f9937ea5/medium.jpg", cat: "esp", era: "2003", price: 38, stock: 7 },
+  { id:41, name: "Zaragoza 99-00 Home", img: "https://photo.yupoo.com/youlooking_v/a520efec/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 8 },
+  { id:42, name: "Barcelona 98-99 Away", img: "https://photo.yupoo.com/youlooking_v/139b9f6d/medium.jpg", cat: "esp", era: "1998", price: 38, stock: 9 },
+  { id:43, name: "Atletico Madrid 98-99 Home", img: "https://photo.yupoo.com/youlooking_v/daf83307/medium.jpg", cat: "esp", era: "1998", price: 38, stock: 10 },
+  { id:44, name: "Atletico Madrid 98-99 Away", img: "https://photo.yupoo.com/youlooking_v/ef1f4623/medium.jpg", cat: "esp", era: "1998", price: 38, stock: 5 },
+  { id:45, name: "Valencia 99-00 Home", img: "https://photo.yupoo.com/youlooking_v/e91a5d7b/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 4 },
+  { id:46, name: "Valencia 99-00 Third", img: "https://photo.yupoo.com/youlooking_v/ff096516/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 2 },
+  { id:47, name: "Spain 98-99 Home", img: "https://photo.yupoo.com/youlooking_v/cb271f51/medium.jpg", cat: "sel", era: "1998", price: 38, stock: 6 },
+  { id:48, name: "Spain 98-99 Away", img: "https://photo.yupoo.com/youlooking_v/c88a1d9d/medium.jpg", cat: "sel", era: "1998", price: 38, stock: 3 },
+  { id:49, name: "Getafe 09-10 Home", img: "https://photo.yupoo.com/youlooking_v/b3fd5a83/medium.jpg", cat: "esp", era: "2009", price: 38, stock: 8 },
+  { id:50, name: "Oviedo 90-91 Home Blue", img: "https://photo.yupoo.com/youlooking_v/498472da/medium.jpg", cat: "esp", era: "1990", price: 38, stock: 7 },
+  { id:51, name: "Villarreal 04-05 Home", img: "https://photo.yupoo.com/youlooking_v/58ea0b15/medium.jpg", cat: "esp", era: "2004", price: 38, stock: 4 },
+  { id:52, name: "Hercules 96-97 Home", img: "https://photo.yupoo.com/youlooking_v/ca6a0ac1/medium.jpg", cat: "esp", era: "1996", price: 38, stock: 9 },
+  { id:53, name: "Cadiz 91-92 Home", img: "https://photo.yupoo.com/youlooking_v/c3cbdd6b/medium.jpg", cat: "esp", era: "1991", price: 38, stock: 2 },
+  { id:54, name: "Sevilla 92-93 Away", img: "https://photo.yupoo.com/youlooking_v/7537439a/medium.jpg", cat: "esp", era: "1992", price: 38, stock: 6 },
+  { id:55, name: "Arsenal 91-93 Away Yellow", img: "https://photo.yupoo.com/youlooking_v/e546e117/medium.jpg", cat: "eng", era: "1991", price: 38, stock: 5 },
+  { id:56, name: "Sevilla 91-92 Home", img: "https://photo.yupoo.com/youlooking_v/8faeb24a/medium.jpg", cat: "esp", era: "1991", price: 38, stock: 10 },
+  { id:57, name: "Sevilla 91-92 Away Red", img: "https://photo.yupoo.com/youlooking_v/36855a6f/medium.jpg", cat: "esp", era: "1991", price: 38, stock: 2 },
+  { id:58, name: "Cadiz 91-92 Retro", img: "https://photo.yupoo.com/youlooking_v/7df18e40/medium.jpg", cat: "esp", era: "1991", price: 38, stock: 4 },
+  { id:59, name: "Sevilla 87-90 Home", img: "https://photo.yupoo.com/youlooking_v/0958974a/medium.jpg", cat: "esp", era: "1987", price: 38, stock: 3 },
+  { id:60, name: "Sevilla 87-90 Away", img: "https://photo.yupoo.com/youlooking_v/84a30bcb/medium.jpg", cat: "esp", era: "1987", price: 38, stock: 7 },
+  { id:61, name: "Iron Maiden 2016 Home Black", img: "https://photo.yupoo.com/classic-football-fhirts052/fb3b2fba/medium.jpg", cat: "eng", era: "2016", price: 38, stock: 5 },
+  { id:62, name: "Valencia 2006-07 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/126fe205/medium.jpg", cat: "esp", era: "2006", price: 38, stock: 4 },
+  { id:63, name: "River Plate 1999-00 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/7a14a7b0/medium.jpg", cat: "sud", era: "1999", price: 38, stock: 9 },
+  { id:64, name: "River Plate 2005-06 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/26afd040/medium.jpg", cat: "sud", era: "2005", price: 38, stock: 2 },
+  { id:65, name: "Brazil 2024 Training Green", img: "https://photo.yupoo.com/classic-football-fhirts052/4ba51352/medium.jpg", cat: "sel", era: "2024", price: 38, stock: 6 },
+  { id:66, name: "Celta 2001-02 Second Away", img: "https://photo.yupoo.com/classic-football-fhirts052/575d7551/medium.jpg", cat: "esp", era: "2001", price: 38, stock: 8 },
+  { id:67, name: "Italy 2000 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/d4f7aa7a/medium.jpg", cat: "sel", era: "2000", price: 38, stock: 3 },
+  { id:68, name: "Spain 1998 Away White", img: "https://photo.yupoo.com/classic-football-fhirts052/6c23f149/medium.jpg", cat: "sel", era: "1998", price: 38, stock: 5 },
+  { id:69, name: "France 1980-82 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/64685a26/medium.jpg", cat: "sel", era: "1980", price: 38, stock: 7 },
+  { id:70, name: "Japan 1998 GK Flamini Green", img: "https://photo.yupoo.com/classic-football-fhirts052/78520e44/medium.jpg", cat: "sel", era: "1998", price: 38, stock: 10 },
+  { id:71, name: "Roma 2001-02 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/ecf634d7/medium.jpg", cat: "eur", era: "2001", price: 38, stock: 2 },
+  { id:72, name: "Spain 2008 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/8e92fdbc/medium.jpg", cat: "sel", era: "2008", price: 38, stock: 4 },
+  { id:73, name: "Ajax 1989-90 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/2765f178/medium.jpg", cat: "eur", era: "1989", price: 38, stock: 9 },
+  { id:74, name: "France 1980-82 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/f9cdd3b5/medium.jpg", cat: "sel", era: "1980", price: 38, stock: 3 },
+  { id:75, name: "Ajax 1994-95 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/1acf6811/medium.jpg", cat: "eur", era: "1994", price: 38, stock: 5 },
+  { id:76, name: "Celta 1999-00 Home Blue", img: "https://photo.yupoo.com/classic-football-fhirts052/1d286dff/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 6 },
+  { id:77, name: "Newcastle 1997-99 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/210b7504/medium.jpg", cat: "eng", era: "1997", price: 38, stock: 8 },
+  { id:78, name: "Newcastle 2005-06 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/37cd7ab9/medium.jpg", cat: "eng", era: "2005", price: 38, stock: 4 },
+  { id:79, name: "West Ham 1999 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/812206d0/medium.jpg", cat: "eng", era: "1999", price: 38, stock: 7 },
+  { id:80, name: "West Ham 1999 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/034e1208/medium.jpg", cat: "eng", era: "1999", price: 38, stock: 3 },
+  { id:81, name: "Brazil 1992 Away Blue", img: "https://photo.yupoo.com/classic-football-fhirts052/8e1ab04d/medium.jpg", cat: "sel", era: "1992", price: 38, stock: 6 },
+  { id:82, name: "Iron Maiden 2008 Away Yellow", img: "https://photo.yupoo.com/classic-football-fhirts052/19b7dc34/medium.jpg", cat: "eng", era: "2008", price: 38, stock: 5 },
+  { id:83, name: "Roma 2001-02 Long Sleeve", img: "https://photo.yupoo.com/classic-football-fhirts052/8d3ba236/medium.jpg", cat: "eur", era: "2001", price: 38, stock: 2 },
+  { id:84, name: "Bayern Munich 2003-04 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/a123102b/medium.jpg", cat: "eur", era: "2003", price: 38, stock: 4 },
+  { id:85, name: "Netherlands 1996 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/3c503b22/medium.jpg", cat: "sel", era: "1996", price: 38, stock: 7 },
+  { id:86, name: "Lazio 1996-97 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/3f85e939/medium.jpg", cat: "eur", era: "1996", price: 38, stock: 5 },
+  { id:87, name: "Dortmund 1995-96 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/d2629412/medium.jpg", cat: "eur", era: "1995", price: 38, stock: 9 },
+  { id:88, name: "Italy 1982 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/45085d02/medium.jpg", cat: "sel", era: "1982", price: 38, stock: 3 },
+  { id:89, name: "Bayern Munich 2001-02 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/1ed2187f/medium.jpg", cat: "eur", era: "2001", price: 38, stock: 6 },
+  { id:90, name: "AC Milan 2008-09 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/2426e5fc/medium.jpg", cat: "eur", era: "2008", price: 38, stock: 4 },
+  { id:91, name: "Germany 1988-90 Away Black", img: "https://photo.yupoo.com/classic-football-fhirts052/3095a756/medium.jpg", cat: "sel", era: "1988", price: 38, stock: 7 },
+  { id:92, name: "Juventus 2012-13 Away Black", img: "https://photo.yupoo.com/classic-football-fhirts052/1baa703c/medium.jpg", cat: "eur", era: "2012", price: 38, stock: 8 },
+  { id:93, name: "AC Milan 2012-13 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/9e3a039e/medium.jpg", cat: "eur", era: "2012", price: 38, stock: 5 },
+  { id:94, name: "AC Milan 2011-12 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/165f07c0/medium.jpg", cat: "eur", era: "2011", price: 38, stock: 6 },
+  { id:125, name: "Liverpool 2010-11 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/6a844d18/medium.jpg", cat: "eng", era: "2010", price: 38, stock: 10 },
+  { id:126, name: "Manchester United 1998-99 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/e42e3b2a/medium.jpg", cat: "eng", era: "1998", price: 38, stock: 3 },
+  { id:127, name: "Liverpool 1998 Away White", img: "https://photo.yupoo.com/classic-football-fhirts052/73f1dcd7/medium.jpg", cat: "eng", era: "1998", price: 38, stock: 4 },
+  { id:128, name: "Portugal 2018 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/e9b99bf2/medium.jpg", cat: "sel", era: "2018", price: 38, stock: 2 },
+  { id:129, name: "Roma 2000-01 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/d85d2af4/medium.jpg", cat: "eur", era: "2000", price: 38, stock: 5 },
+  { id:130, name: "Arsenal 2008-10 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/6c55914/medium.jpg", cat: "eng", era: "2008", price: 38, stock: 7 },
+  { id:131, name: "Spain 2011-12 Away White", img: "https://photo.yupoo.com/classic-football-fhirts052/bfcff9e6/medium.jpg", cat: "sel", era: "2011", price: 38, stock: 9 },
+  { id:132, name: "Valencia 2000-01 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/d44aa3ec/medium.jpg", cat: "esp", era: "2000", price: 38, stock: 4 },
+  { id:133, name: "Fiorentina 1992-93 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/b11a623d/medium.jpg", cat: "eur", era: "1992", price: 38, stock: 2 },
+  { id:134, name: "Fiorentina 1992-93 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/f0ade242/medium.jpg", cat: "eur", era: "1992", price: 38, stock: 6 },
+  { id:135, name: "Barcelona 2000-01 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/faa23569/medium.jpg", cat: "esp", era: "2000", price: 38, stock: 8 },
+  { id:136, name: "Ajax 94-95 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/52688865/medium.jpg", cat: "eur", era: "1994", price: 38, stock: 5 },
+  { id:137, name: "Inter Milan 98-99 Away", img: "https://photo.yupoo.com/classic-football-fhirts052/b55f3adf/medium.jpg", cat: "eur", era: "1998", price: 38, stock: 3 },
+  { id:138, name: "Arsenal 98-99 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/fcc21038/medium.jpg", cat: "eng", era: "1998", price: 38, stock: 7 },
+  { id:139, name: "Arsenal 05-06 Home Maroon", img: "https://photo.yupoo.com/classic-football-fhirts052/4c169b07/medium.jpg", cat: "eng", era: "2005", price: 38, stock: 4 },
+  { id:140, name: "Arsenal 02-04 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/89fcd18c/medium.jpg", cat: "eng", era: "2002", price: 38, stock: 2 },
+  { id:141, name: "Arsenal 02-04 Away Blue", img: "https://photo.yupoo.com/classic-football-fhirts052/c07a650c/medium.jpg", cat: "eng", era: "2002", price: 38, stock: 6 },
+  { id:142, name: "Arsenal 04-05 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/5030fbd1/medium.jpg", cat: "eng", era: "2004", price: 38, stock: 8 },
+  { id:143, name: "Arsenal 04-05 Away Blue", img: "https://photo.yupoo.com/classic-football-fhirts052/2232eadc/medium.jpg", cat: "eng", era: "2004", price: 38, stock: 3 },
+  { id:144, name: "Arsenal 2000-02 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/9831d900/medium.jpg", cat: "eng", era: "2000", price: 38, stock: 5 },
+  { id:145, name: "Arsenal 2000-02 Away Yellow", img: "https://photo.yupoo.com/classic-football-fhirts052/8a74331d/medium.jpg", cat: "eng", era: "2000", price: 38, stock: 7 },
+  { id:146, name: "Arsenal 1999-00 Home", img: "https://photo.yupoo.com/classic-football-fhirts052/cdf45d97/medium.jpg", cat: "eng", era: "1999", price: 38, stock: 4 },
+  { id:147, name: "Arsenal 1999-00 Away Yellow", img: "https://photo.yupoo.com/classic-football-fhirts052/89fcd18c/medium.jpg", cat: "eng", era: "1999", price: 38, stock: 9 },
+  { id:150, name: "Manchester United 2014-15 Home", img: "https://photo.yupoo.com/huiliyuan/89ff92ca/medium.jpg", cat: "eng", era: "2014", price: 38, stock: 3 },
+  { id:151, name: "Liverpool 1998-99 Away", img: "https://photo.yupoo.com/huiliyuan/3c421887/medium.jpg", cat: "eng", era: "1998", price: 38, stock: 7 },
+  { id:152, name: "Valencia 1999-00 Away", img: "https://photo.yupoo.com/huiliyuan/22f1bc28/medium.jpg", cat: "esp", era: "1999", price: 38, stock: 2 },
+  { id:153, name: "AC Milan 2004-05 Away", img: "https://photo.yupoo.com/huiliyuan/1b64463b/medium.jpg", cat: "eur", era: "2004", price: 38, stock: 5 },
+  { id:154, name: "Inter Milan 2001-02 Home", img: "https://photo.yupoo.com/huiliyuan/32602929/medium.jpg", cat: "eur", era: "2001", price: 38, stock: 4 },
+  { id:155, name: "Argentina 1978 Home", img: "https://photo.yupoo.com/huiliyuan/3c50e8ca/medium.jpg", cat: "sel", era: "1978", price: 38, stock: 6 },
+  { id:156, name: "AC Milan 1997-98 Special Red", img: "https://photo.yupoo.com/huiliyuan/c64f5f91/medium.jpg", cat: "eur", era: "1997", price: 38, stock: 9 },
+  { id:157, name: "Inter Milan 1997-98 Away", img: "https://photo.yupoo.com/huiliyuan/e48d8816/medium.jpg", cat: "eur", era: "1997", price: 38, stock: 3 },
+  { id:158, name: "Manchester United 2018-19 Away Pink", img: "https://photo.yupoo.com/huiliyuan/7bb61164/medium.jpg", cat: "eng", era: "2018", price: 38, stock: 8 },
+  { id:159, name: "Malaga 1997-98 Home", img: "https://photo.yupoo.com/huiliyuan/8d4b835c/medium.jpg", cat: "esp", era: "1997", price: 38, stock: 4 },
+  { id:160, name: "Spain 2012 Away", img: "https://photo.yupoo.com/huiliyuan/1ebe0f77/medium.jpg", cat: "sel", era: "2012", price: 38, stock: 2 },
+  { id:161, name: "Barcelona 2015-16 Third", img: "https://photo.yupoo.com/huiliyuan/90db7689/medium.jpg", cat: "esp", era: "2015", price: 38, stock: 5 },
+  { id:162, name: "Celtic 2006-07 Away", img: "https://photo.yupoo.com/huiliyuan/c94e8d7d/medium.jpg", cat: "eur", era: "2006", price: 38, stock: 7 },
+  { id:163, name: "Netherlands 2010 Home", img: "https://photo.yupoo.com/huiliyuan/7ebb20fd/medium.jpg", cat: "sel", era: "2010", price: 38, stock: 10},
+  { id:164, name: "Netherlands 2010 Away", img: "https://photo.yupoo.com/huiliyuan/cbc6a01d/medium.jpg", cat: "sel", era: "2010", price: 38, stock: 2 },
+  { id:165, name: "Spain 2000 Away", img: "https://photo.yupoo.com/huiliyuan/2e643374/medium.jpg", cat: "sel", era: "2000", price: 38, stock: 4 },
+  { id:166, name: "Flamengo 1995 Home", img: "https://photo.yupoo.com/huiliyuan/d515791c/medium.jpg", cat: "sud", era: "1995", price: 38, stock: 6 },
+  { id:167, name: "Arsenal 2003-04 Away Yellow", img: "https://photo.yupoo.com/huiliyuan/2e49a26c/medium.jpg", cat: "eng", era: "2003", price: 38, stock: 9 },
+  { id:168, name: "Japan 2014 Home", img: "https://photo.yupoo.com/huiliyuan/064291a0/medium.jpg", cat: "sel", era: "2014", price: 38, stock: 3 },
+  { id:169, name: "PSG 2000-01 Home", img: "https://photo.yupoo.com/huiliyuan/6a91829d/medium.jpg", cat: "eur", era: "2000", price: 38, stock: 7 },
+  { id:170, name: "AC Milan 2014-15 Home", img: "https://photo.yupoo.com/huiliyuan/fead2975/medium.jpg", cat: "eur", era: "2014", price: 38, stock: 4 },
+  { id:171, name: "Inter Milan 2004-05 Third", img: "https://photo.yupoo.com/huiliyuan/6972d705/medium.jpg", cat: "eur", era: "2004", price: 38, stock: 8 },
+  { id:172, name: "Spain 2000 Home", img: "https://photo.yupoo.com/huiliyuan/c1978e5d/medium.jpg", cat: "sel", era: "2000", price: 38, stock: 5 },
+  { id:173, name: "Inter Milan 2007-08 Home", img: "https://photo.yupoo.com/huiliyuan/ada53541/medium.jpg", cat: "eur", era: "2007", price: 38, stock: 6 },
+  { id:174, name: "Liverpool 1986-87 Home", img: "https://photo.yupoo.com/huiliyuan/16639e0e/medium.jpg", cat: "eng", era: "1986", price: 38, stock: 10},
+  { id:175, name: "AC Milan 1997-98 Black Special", img: "https://photo.yupoo.com/huiliyuan/8558eaff/medium.jpg", cat: "eur", era: "1997", price: 38, stock: 2 },
+  { id:176, name: "AC Milan 1989-90 Away", img: "https://photo.yupoo.com/huiliyuan/b07794e9/medium.jpg", cat: "eur", era: "1989", price: 38, stock: 4 },
+  { id:177, name: "AC Milan 1997-98 Away", img: "https://photo.yupoo.com/huiliyuan/9b8c781b/medium.jpg", cat: "eur", era: "1997", price: 38, stock: 3 },
+  { id:178, name: "Manchester United 2007-08 GK Green", img: "https://photo.yupoo.com/huiliyuan/21546b7a/medium.jpg", cat: "eng", era: "2007", price: 38, stock: 7 },
+  { id:179, name: "AC Milan 1997-98 Third", img: "https://photo.yupoo.com/huiliyuan/7c6a4d67/medium.jpg", cat: "eur", era: "1997", price: 38, stock: 5 },
+  { id:180, name: "Germany 2006 Home Long Sleeve", img: "https://photo.yupoo.com/huiliyuan/ecc23add/medium.jpg", cat: "sel", era: "2006", price: 38, stock: 9 },
+  { id:181, name: "Brazil 2012-13 Home", img: "https://photo.yupoo.com/huiliyuan/da8e990b/medium.jpg", cat: "sel", era: "2012", price: 38, stock: 8 },
+  { id:182, name: "Flamengo 1994 Home", img: "https://photo.yupoo.com/huiliyuan/96f1885c/medium.jpg", cat: "sud", era: "1994", price: 38, stock: 4 },
+  { id:183, name: "Fiorentina 1999-00 Away", img: "https://photo.yupoo.com/huiliyuan/25b02f37/medium.jpg", cat: "eur", era: "1999", price: 38, stock: 3 },
+  { id:184, name: "Bayern Munich 2000-02 Away", img: "https://photo.yupoo.com/huiliyuan/c4cd83a3/medium.jpg", cat: "eur", era: "2000", price: 38, stock: 6 },
+  { id:185, name: "Romania 2000 Home", img: "https://photo.yupoo.com/huiliyuan/770d447b/medium.jpg", cat: "sel", era: "2000", price: 38, stock: 2 },
+  { id:186, name: "Nigeria 1994 Home", img: "https://photo.yupoo.com/huiliyuan/33c31c61/medium.jpg", cat: "sel", era: "1994", price: 38, stock: 5 },
+  { id:187, name: "Brazil 2002 Away Long Sleeve", img: "https://photo.yupoo.com/huiliyuan/9ea62133/medium.jpg", cat: "sel", era: "2002", price: 38, stock: 7 },
+  { id:188, name: "Newcastle 2004-05 Away", img: "https://photo.yupoo.com/huiliyuan/c9c5d5e9/medium.jpg", cat: "eng", era: "2004", price: 38, stock: 9 },
+  { id:189, name: "Manchester City 2012-13 Away", img: "https://photo.yupoo.com/huiliyuan/eb6f342a/medium.jpg", cat: "eng", era: "2012", price: 38, stock: 2 },
+  { id:190, name: "Manchester City 2008-09 Away", img: "https://photo.yupoo.com/huiliyuan/7e08e509/medium.jpg", cat: "eng", era: "2008", price: 38, stock: 4 },
+  { id:191, name: "Real Madrid 1984-85 Away", img: "https://photo.yupoo.com/huiliyuan/d532dbf6/medium.jpg", cat: "esp", era: "1984", price: 38, stock: 3 },
+  { id:192, name: "Manchester City 2007-08 Away", img: "https://photo.yupoo.com/huiliyuan/bcdc9396/medium.jpg", cat: "eng", era: "2007", price: 38, stock: 7 },
+  { id:193, name: "Real Madrid 2006-07 Third", img: "https://photo.yupoo.com/huiliyuan/271d475c/medium.jpg", cat: "esp", era: "2006", price: 38, stock: 5 },
 ];
 
 // Jerseys asociados a cada leyenda
 const LEGEND_PRODUCTS = {
-  cr7:     [25, 1, 6],
-  messi:   [8, 9, 11],
-  iniesta: [30, 31],
-  triplete:[9, 10],
+  cr7:     [126, 30, 81],
+  messi:   [42, 1157, 1183],
+  iniesta: [131, 160, 47],
+  triplete:[1183, 135],
 };
 
 // ════════════════════════════
@@ -678,9 +796,9 @@ const LEGEND_PRODUCTS = {
 // ════════════════════════════
 function jersey(p, size=100, h=120){
   if(p.img){
-    return `<div style="width:100%;height:100%;background:#0d0d0d;display:flex;align-items:center;justify-content:center;overflow:hidden">
-      <img src="${p.img}" alt="${p.name} ${p.era}" loading="lazy"
-           style="width:100%;height:100%;object-fit:contain;padding:8px;transition:transform .35s"/>
+    return `<div style="width:100%;height:100%;background:#0d0d0d;max-height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden">
+      <img src="${p.img}" alt="${p.name} ${p.era}" loading="lazy" referrerpolicy="no-referrer"
+           style="width:100%;height:100%;object-fit:cover;transition:transform .35s"/>
     </div>`;
   }
   return `<div style="width:100%;height:100%;background:${p.bg||'#111'};display:flex;align-items:center;justify-content:center">
@@ -723,32 +841,57 @@ function buildLegendCards(){
 // PRODUCT GRID
 // ════════════════════════════
 let currentFilter = 'all';
+let visibleCount = 48;
+const PAGE_SIZE = 48;
+
+function cardHtml(p){
+  const bHtml = p.badge ? `<div class="pc-badge ${p.badge==='HOT'?'pb-hot':'pb-new'}">${p.badge}</div>` : '';
+  const priceHtml = p.old ? `<del>${p.old}€</del> <span>${p.price}€</span>` : `<span>${p.price}€</span>`;
+  const typeLabel = p.type || (p.cat === 'sel' ? 'Selección' : 'Club Retro');
+  return `<div class="pc" onclick="addCart(${p.id})">
+    ${bHtml}
+    <div class="pc-img">
+      <div class="pc-jersey">${jersey(p)}</div>
+      <div class="pc-hover">
+        <button class="pc-add" onclick="event.stopPropagation();addCart(${p.id})">+ Añadir al Carrito</button>
+      </div>
+    </div>
+    <div class="pc-info">
+      <div class="pc-era">${p.era}</div>
+      <div class="pc-name">${p.name}</div>
+      <div class="pc-type">${typeLabel}</div>
+      <div class="pc-foot">
+        <div class="pc-price">${priceHtml}</div>
+        <div class="pcsz"><div class="sz">S</div><div class="sz">M</div><div class="sz">L</div><div class="sz">XL</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function updateLoadMore(list){
+  const btn = document.getElementById('loadMoreBtn');
+  const count = document.getElementById('prodCount');
+  const showing = Math.min(visibleCount, list.length);
+  if(btn) btn.style.display = showing < list.length ? 'inline-block' : 'none';
+  if(count) count.textContent = `Mostrando ${showing} de ${list.length} camisetas`;
+}
+
 function renderGrid(filter='all'){
   currentFilter = filter;
+  visibleCount = PAGE_SIZE;
   const g = document.getElementById('pgrid');
-  const list = filter==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.league===filter);
-  g.innerHTML = list.map(p => {
-    const bHtml = p.badge ? `<div class="pc-badge ${p.badge==='HOT'?'pb-hot':'pb-new'}">${p.badge}</div>` : '';
-    const priceHtml = p.old ? `<del>${p.old}€</del> <span>${p.price}€</span>` : `<span>${p.price}€</span>`;
-    return `<div class="pc">
-      ${bHtml}
-      <div class="pc-img">
-        <div class="pc-jersey">${jersey(p)}</div>
-        <div class="pc-hover">
-          <button class="pc-add" onclick="addCart(${p.id},event)">+ Añadir al Carrito</button>
-        </div>
-      </div>
-      <div class="pc-info">
-        <div class="pc-era">${p.era}</div>
-        <div class="pc-name">${p.name}</div>
-        <div class="pc-type">${p.type}</div>
-        <div class="pc-foot">
-          <div class="pc-price">${priceHtml}</div>
-          <div class="pcsz"><div class="sz">S</div><div class="sz">M</div><div class="sz">L</div><div class="sz">XL</div></div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+  const list = filter==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.cat===filter);
+  g.innerHTML = list.slice(0, visibleCount).map(cardHtml).join('');
+  updateLoadMore(list);
+}
+
+function loadMore(){
+  const list = currentFilter==='all' ? PRODUCTS : PRODUCTS.filter(p=>p.cat===currentFilter);
+  const g = document.getElementById('pgrid');
+  const next = list.slice(visibleCount, visibleCount + PAGE_SIZE);
+  g.insertAdjacentHTML('beforeend', next.map(cardHtml).join(''));
+  visibleCount += PAGE_SIZE;
+  updateLoadMore(list);
 }
 
 function filterProd(f, btn){
