@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Revisar Fotos — Las Leyendas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#eee;font-family:sans-serif;padding:20px}
+h1{text-align:center;color:#d4a017;margin-bottom:8px;font-size:28px}
+p{text-align:center;color:#888;margin-bottom:24px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.card{background:#1a1a1a;border:2px solid #333;padding:10px;position:relative;cursor:pointer;transition:.2s}
+.card:hover{border-color:#d4a017}
+.card.ok{border-color:#27ae60}
+.card.mal{border-color:#e74c3c}
+.card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;margin-bottom:8px;background:#000}
+.id{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);color:#d4a017;font-size:10px;font-weight:bold;padding:2px 6px}
+.name{font-size:12px;font-weight:bold;color:#fff;margin-bottom:3px;line-height:1.3}
+.era{font-size:10px;color:#d4a017;margin-bottom:6px}
+.file{font-size:9px;color:#555;word-break:break-all}
+.btns{display:flex;gap:6px;margin-top:8px}
+.btns button{flex:1;padding:5px;font-size:11px;border:none;cursor:pointer;font-weight:bold}
+.btn-ok{background:#27ae60;color:#fff}
+.btn-mal{background:#e74c3c;color:#fff}
+.legend{display:flex;gap:20px;justify-content:center;margin-bottom:20px;font-size:12px}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:14px;height:14px;border-radius:2px}
+.dot-ok{background:#27ae60}
+.dot-mal{background:#e74c3c}
+.dot-nd{background:#333;border:1px solid #555}
+#stats{text-align:center;margin-bottom:16px;font-size:13px;color:#aaa}
+</style>
+</head>
+<body>
+<h1>Revisar Fotos de Productos</h1>
+<p>Mira cada foto y marca si concuerda con la descripción o no. Luego dile a Claude qué IDs están mal.</p>
+<div class="legend">
+  <span><div class="dot dot-ok"></div> Foto correcta</span>
+  <span><div class="dot dot-mal"></div> Foto incorrecta</span>
+  <span><div class="dot dot-nd"></div> Sin revisar</span>
+</div>
+<div id="stats">Revisadas: <b id="cnt">0</b> / <b id="total">0</b> &nbsp;·&nbsp; Incorrectas: <b id="bad">0</b></div>
+<div style="text-align:center;margin-bottom:16px">
+  <button onclick="exportar()" style="background:#d4a017;color:#000;border:none;padding:10px 28px;font-size:14px;font-weight:bold;cursor:pointer;border-radius:3px">Ver resumen para copiar a Claude</button>
+</div>
+<div id="resumen" style="display:none;background:#1a1a1a;border:1px solid #d4a017;padding:16px;max-width:700px;margin:0 auto 20px;font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+// Pega aquí el array PRODUCTS del index.html
+// (se carga automáticamente desde el mismo index.html si abres desde la misma carpeta)
+</script>
+<script src="data:text/javascript,"></script>
+<script>
+// Cargamos los productos leyendo el index.html
+fetch('index.html')
+  .then(r=>r.text())
+  .then(html=>{
+    const match = html.match(/const PRODUCTS\s*=\s*(\[[\s\S]*?\]);/);
+    if(!match){ document.getElementById('grid').innerHTML='<p style="color:red;padding:20px">No se pudo leer los productos del index.html</p>'; return; }
+    const products = eval(match[1]);
+    document.getElementById('total').textContent = products.length;
+    const saved = JSON.parse(localStorage.getItem('foto-review')||'{}');
+
+    function updateStats(){
+      const all = Object.values(saved);
+      document.getElementById('cnt').textContent = all.length;
+      document.getElementById('bad').textContent = all.filter(x=>x==='mal').length;
+    }
+    updateStats();
+
+    const grid = document.getElementById('grid');
+    products.forEach(p=>{
+      const card = document.createElement('div');
+      card.className = 'card' + (saved[p.id]==='ok'?' ok':saved[p.id]==='mal'?' mal':'');
+      card.id = 'card-'+p.id;
+      const imgSrc = p.img || '';
+      card.innerHTML = `
+        <div class="id">ID ${p.id}</div>
+        ${imgSrc ? `<img src="${imgSrc}" loading="lazy" onerror="this.style.background='#333';this.alt='Sin foto'"/>` : '<div style="width:100%;aspect-ratio:3/4;background:#222;display:flex;align-items:center;justify-content:center;color:#555;font-size:12px">Sin foto</div>'}
+        <div class="name">${p.name}</div>
+        <div class="era">${p.era} · ${p.cat.toUpperCase()}</div>
+        <div class="file">${imgSrc}</div>
+        <div class="btns">
+          <button class="btn-ok" onclick="mark(${p.id},'ok')">✓ Correcta</button>
+          <button class="btn-mal" onclick="mark(${p.id},'mal')">✗ Incorrecta</button>
+        </div>`;
+      grid.appendChild(card);
+    });
+
+    window.exportar = function(){
+      const malas = Object.entries(saved).filter(([k,v])=>v==='mal');
+      const buenas = Object.entries(saved).filter(([k,v])=>v==='ok');
+      const sinRevisar = products.filter(p=>!saved[p.id]);
+      let txt = '=== RESUMEN DE REVISIÓN ===\n\n';
+      txt += `Revisadas: ${Object.keys(saved).length} / ${products.length}\n`;
+      txt += `Correctas: ${buenas.length}\n`;
+      txt += `Incorrectas: ${malas.length}\n`;
+      txt += `Sin revisar: ${sinRevisar.length}\n\n`;
+      if(malas.length){
+        txt += '--- FOTOS INCORRECTAS ---\n';
+        malas.forEach(([id])=>{
+          const p = products.find(x=>x.id==id);
+          txt += `ID ${id}: ${p?p.name:''} (${p?p.era:''}) - img: ${p?p.img:''}\n`;
+        });
+      }
+      if(sinRevisar.length){
+        txt += '\n--- SIN REVISAR ---\n';
+        sinRevisar.forEach(p=>{ txt += `ID ${p.id}: ${p.name}\n`; });
+      }
+      const el = document.getElementById('resumen');
+      el.textContent = txt;
+      el.style.display = 'block';
+      el.scrollIntoView({behavior:'smooth'});
+      // Copiar al portapapeles
+      navigator.clipboard.writeText(txt).then(()=>alert('Copiado al portapapeles')).catch(()=>{});
+    };
+
+    window.mark = function(id, status){
+      saved[id] = status;
+      localStorage.setItem('foto-review', JSON.stringify(saved));
+      const card = document.getElementById('card-'+id);
+      card.className = 'card ' + status;
+      updateStats();
+      // Mostrar lista de incorrectas en consola
+      const malas = Object.entries(saved).filter(([k,v])=>v==='mal').map(([k])=>k);
+      if(malas.length) console.log('IDs incorrectas:', malas.join(', '));
+    };
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+*.backup
+*.backup2
+*.backup_photos
+album_photos.json
+descargar_fotos.py
+fix_photos.py
+scrape_album_photos.py

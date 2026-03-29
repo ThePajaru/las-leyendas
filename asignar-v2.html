@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Asignar Fotos — Las Leyendas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#eee;font-family:system-ui,sans-serif;display:flex;height:100vh;overflow:hidden}
+/* LEFT: product grid */
+#grid{width:320px;min-width:220px;overflow-y:auto;border-right:1px solid #333;background:#0a0a0a;padding:8px;flex-shrink:0}
+#grid h2{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#666;padding:4px 0 8px}
+.prod-thumb{display:inline-block;width:88px;margin:3px;cursor:pointer;border:2px solid transparent;border-radius:3px;overflow:hidden;position:relative;vertical-align:top}
+.prod-thumb img{width:88px;height:88px;object-fit:cover;display:block}
+.prod-thumb .pid{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);font-size:9px;padding:2px 3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prod-thumb.active{border-color:#f0c040}
+.prod-thumb.ok{border-color:#27ae60}
+.prod-thumb.wrong{border-color:#e74c3c}
+/* RIGHT: editor */
+#editor{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#top-bar{padding:12px 16px;background:#161616;border-bottom:1px solid #333;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#top-bar h1{font-size:14px;color:#f0c040;font-weight:700;flex:1}
+#nav-btns{display:flex;gap:6px}
+#nav-btns button{background:#222;border:1px solid #444;color:#eee;padding:5px 12px;cursor:pointer;font-size:12px;border-radius:3px}
+#nav-btns button:hover{background:#333}
+#editor-body{flex:1;display:flex;overflow:hidden}
+/* Current photo + info */
+#cur-panel{width:280px;padding:16px;border-right:1px solid #333;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex-shrink:0}
+#cur-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;background:#222}
+#cur-id{font-size:11px;color:#666}
+#cur-name{font-size:13px;font-weight:600;color:#f0c040;line-height:1.4}
+#name-edit{width:100%;background:#1a1a1a;border:1px solid #444;color:#eee;padding:6px 8px;font-size:12px;border-radius:3px}
+.act-btns{display:flex;flex-direction:column;gap:6px}
+.act-btns button{padding:7px;font-size:12px;border:none;border-radius:3px;cursor:pointer;font-weight:600}
+#btn-ok{background:#27ae60;color:#fff}
+#btn-ok:hover{background:#2ecc71}
+#btn-wrong{background:#c0392b;color:#fff}
+#btn-wrong:hover{background:#e74c3c}
+#btn-skip{background:#333;color:#999}
+#btn-skip:hover{background:#444}
+/* Search panel */
+#search-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:12px}
+#search-bar{display:flex;gap:8px;margin-bottom:10px}
+#search-input{flex:1;background:#1a1a1a;border:1px solid #444;color:#eee;padding:8px 12px;font-size:14px;border-radius:3px;outline:none}
+#search-input:focus{border-color:#f0c040}
+#search-count{font-size:11px;color:#666;align-self:center;white-space:nowrap}
+#results{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;align-content:start}
+.result-card{background:#1a1a1a;border:1px solid #333;border-radius:4px;cursor:pointer;overflow:hidden;transition:border-color .15s}
+.result-card:hover{border-color:#f0c040}
+.result-card img{width:100%;height:120px;object-fit:cover;display:block;background:#222}
+.result-card .r-title{padding:5px 6px;font-size:10px;color:#ccc;line-height:1.3}
+.result-card .r-hash{padding:0 6px 5px;font-size:9px;color:#555}
+/* Progress bar */
+#progress{padding:4px 16px;background:#0d0d0d;font-size:11px;color:#666;border-top:1px solid #2a2a2a;display:flex;gap:16px}
+#progress span{color:#f0c040}
+/* Export panel */
+#export-area{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:center;justify-content:center}
+#export-area.open{display:flex}
+#export-box{background:#1a1a1a;border:1px solid #444;padding:20px;max-width:700px;width:90%;border-radius:6px}
+#export-box h3{color:#f0c040;margin-bottom:10px;font-size:14px}
+#export-text{width:100%;height:300px;background:#111;color:#9f9;font-family:monospace;font-size:11px;padding:10px;border:1px solid #333;border-radius:3px;resize:none}
+#export-box .close-exp{background:#333;border:none;color:#eee;padding:6px 16px;cursor:pointer;border-radius:3px;margin-top:8px;font-size:12px}
+</style>
+</head>
+<body>
+
+<div id="grid">
+  <h2>Productos (<span id="g-count">0</span>)</h2>
+  <div id="grid-inner"></div>
+</div>
+
+<div id="editor">
+  <div id="top-bar">
+    <h1 id="top-title">Cargando...</h1>
+    <div id="nav-btns">
+      <button onclick="navigate(-1)">◀ Anterior</button>
+      <button onclick="navigate(1)">Siguiente ▶</button>
+      <button onclick="showExport()" style="background:#f0c040;color:#111">📤 Exportar correcciones</button>
+    </div>
+  </div>
+  <div id="editor-body">
+    <div id="cur-panel">
+      <img id="cur-img" src="" alt=""/>
+      <div id="cur-id"></div>
+      <div id="cur-name"></div>
+      <input id="name-edit" type="text" placeholder="Nombre del producto..."/>
+      <div class="act-btns">
+        <button id="btn-ok" onclick="markOk()">✅ Correcto tal como está</button>
+        <button id="btn-wrong" onclick="markWrong()">❌ Foto incorrecta</button>
+        <button id="btn-skip" onclick="navigate(1)">Saltar →</button>
+      </div>
+      <div style="font-size:11px;color:#555;line-height:1.5">
+        Busca la camiseta correcta a la derecha. Al encontrarla, haz clic en ella para asignarla a este producto.
+      </div>
+    </div>
+    <div id="search-panel">
+      <div id="search-bar">
+        <input id="search-input" type="text" placeholder="Busca: barcelona 98, real madrid, ajax..." oninput="doSearch(this.value)" autofocus/>
+        <div id="search-count">0 resultados</div>
+      </div>
+      <div id="results"></div>
+    </div>
+  </div>
+  <div id="progress">
+    Marcados: <span id="p-ok">0</span> correctos · <span id="p-wrong">0</span> incorrectos · <span id="p-total">0</span> pendientes
+  </div>
+</div>
+
+<div id="export-area">
+  <div id="export-box">
+    <h3>Script de correcciones — copia y ejecuta en Python</h3>
+    <textarea id="export-text" readonly></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="close-exp" onclick="document.getElementById('export-area').classList.remove('open')">Cerrar</button>
+      <button class="close-exp" style="background:#27ae60" onclick="copyExport()">📋 Copiar al portapapeles</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ALBUMS database (title, hash) from classic-football-fhirts052.x.yupoo.com ──
+const ALBUMS = [
+// Page 1
+["2016赛季铁娘子主场黑色 Iron Maiden 2016 Home Black","126fe205"],
+["2006/07赛季瓦伦西亚客场 Valencia 2006-07 Away","7a14a7b0"],
+["1999/00赛季河床客场 River Plate 1999-00 Away","26afd040"],
+["2005/06赛季河床客场 River Plate 2005-06 Away","4ba51352"],
+["2024赛季巴西湖绿色训练服 Brazil 2024 Training Green","575d7551"],
+["2001/02赛季塞尔塔二客红白 Celta 2001-02 Second Away","d4f7aa7a"],
+["2000赛季意大利主场 Italy 2000 Home","6c23f149"],
+["1998赛季西班牙客场白色 Spain 1998 Away White","64685a26"],
+["1980/82赛季法国客场LS France 1980-82 Away Long Sleeve","78520e44"],
+["1998赛季日本守门员火焰绿色LS Japan 1998 GK Flame Green","ecf634d7"],
+["2001/02赛季罗马主场 Roma 2001-02 Home","8e92fdbc"],
+["2008赛季西班牙客场 Spain 2008 Away","2765f178"],
+["1989/90赛季阿贾克斯客场LS Ajax 1989-90 Away Long Sleeve","f9cdd3b5"],
+["1980/82赛季法国主场LS France 1980-82 Home Long Sleeve","1acf6811"],
+["1994/95赛季阿贾克斯主场 Ajax 1994-95 Home","1d286dff"],
+["1999/00赛季塞尔塔主场蓝色 Celta 1999-00 Home Blue","210b7504"],
+["1997/99赛季纽卡斯尔联主场 Newcastle 1997-99 Home","37cd7ab9"],
+["2005/06赛季纽卡斯尔联主场 Newcastle 2005-06 Home","812206d0"],
+["1999赛季西汉姆联客场决赛版 West Ham 1999 Away Final","034e1208"],
+["1999赛季西汉姆联主场决赛版 West Ham 1999 Home Final","8e1ab04d"],
+["1992赛季巴西客场蓝色 Brazil 1992 Away Blue","19b7dc34"],
+["2008赛季铁娘子客场黄色 Iron Maiden 2008 Away Yellow","8d3ba236"],
+["2001/02赛季罗马长袖LS Roma 2001-02 Long Sleeve","a123102b"],
+["2003/04赛季拜仁主场 Bayern Munich 2003-04 Home","3c503b22"],
+["2008赛季弗拉门戈主场 Flamengo 2008 Home","3f85e939"],
+["1992/94赛季阿森纳客场黑色 Arsenal 1992-94 Away Black","45085d02"],
+["1994/95赛季挪威主场 Norway 1994-95 Home","1ed2187f"],
+["1994/95赛季日本主场 Japan 1994-95 Home","2426e5fc"],
+["2017/18赛季罗马主场 Roma 2017-18 Home","3095a756"],
+["2013/14赛季利物浦主场 Liverpool 2013-14 Home","1baa703c"],
+["2006/07赛季日本主场 Japan 2006-07 Home","9e3a039e"],
+["2010/11赛季巴萨主场LS Barcelona 2010-11 Home Long Sleeve","165f07c0"],
+["2015/16赛季尤文二客黑色 Juventus 2015-16 Third Black","6a844d18"],
+["2005/06赛季巴萨主场欧冠LS Barcelona 2005-06 Home CL Long Sleeve","e42e3b2a"],
+["1998/99赛季巴萨主场翻领 Barcelona 1998-99 Home V-neck","73f1dcd7"],
+["2005/06赛季巴萨主场LS Barcelona 2005-06 Home Long Sleeve","e9b99bf2"],
+["美洲队纪念版主场黄色 Club America Anniversary Home Yellow","d85d2af4"],
+["1986赛季阿根廷客场彩蓝 Argentina 1986 Away Blue","d6c55914"],
+["2001/02赛季塞尔塔客场黑色 Celta 2001-02 Away Black","bfcff9e6"],
+["2001/02赛季塞尔塔主场蓝色 Celta 2001-02 Home Blue","d44aa3ec"],
+["2003/04赛季皇马客场 Real Madrid 2003-04 Away","b11a623d"],
+["2018/19赛季尤文主场 Juventus 2018-19 Home","f0ade242"],
+["2019/20赛季利物浦主场 Liverpool 2019-20 Home","faa23569"],
+["2019/20赛季曼联主场 Manchester United 2019-20 Home","f08daddc"],
+["1991/93赛季那不勒斯主场 Napoli 1991-93 Home","cd688a7d"],
+["2006赛季西班牙客场白色 Spain 2006 Away White","70d00297"],
+["1996赛季意大利主场 Italy 1996 Home","998d8358"],
+["1996赛季荷兰主场 Netherlands 1996 Home","11434570"],
+["1995/96赛季多特主场 Dortmund 1995-96 Home","b55f3adf"],
+["1982赛季意大利主场 Italy 1982 Home","fcc21038"],
+["2001/02赛季拜仁主场 Bayern Munich 2001-02 Home","4c169b07"],
+["2008/09赛季AC主场提花LS AC Milan 2008-09 Home Jacquard Long Sleeve","89fcd18c"],
+["1988/90赛季德国客场黑色 Germany 1988-90 Away Black","c07a650c"],
+["2012/13赛季尤文客场黑色 Juventus 2012-13 Away Black","2232eadc"],
+["2012/13赛季AC主场 AC Milan 2012-13 Home","9831d900"],
+["2011/12赛季AC主场 AC Milan 2011-12 Home","8a74331d"],
+["2010/11赛季利物浦主场LS Liverpool 2010-11 Home Long Sleeve","cdf45d97"],
+["1998/99赛季曼联白色LS Manchester United 1998-99 Away Long Sleeve","172f29a9"],
+["1998赛季利物浦客场白色LS Liverpool 1998 Away White Long Sleeve","a7f2f86f"],
+["2018赛季葡萄牙主场LS Portugal 2018 Home Long Sleeve","114b9971"],
+["2000/01赛季罗马主场 Roma 2000-01 Home","5e20c2d7"],
+["2008/10赛季阿森纳主场 Arsenal 2008-10 Home","77867383"],
+["2011/12赛季西班牙客场白色 Spain 2011-12 Away White","b1860be3"],
+["2018赛季葡萄牙主场 Portugal 2018 Home","2aed1cc7"],
+["2018赛季巴西主场 Brazil 2018 Home","4d7069a2"],
+["2000/01赛季瓦伦西亚主场 Valencia 2000-01 Home","219888f1"],
+["1992/93佛罗伦萨客场 Fiorentina 1992-93 Away","6f367da8"],
+["1992/93佛罗伦萨主场 Fiorentina 1992-93 Home","65bab46f"],
+["2000/01赛季巴萨主场 Barcelona 2000-01 Home","e4d67e94"],
+["1998赛季利物浦客场白色 Liverpool 1998 Away White","a0538ee1"],
+["1998/99赛季切尔西客场白色 Chelsea 1998-99 Away White","7c3db26e"],
+["1998赛季西班牙主场 Spain 1998 Home","ba5880d5"],
+["1996/97赛季AC主场盾牌版 AC Milan 1996-97 Home Shield","ffe25fab"],
+["2006/07赛季阿森纳主场LS Arsenal 2006-07 Home Long Sleeve","6899b601"],
+["2003/05赛季哥伦比亚主场 Colombia 2003-05 Home","5f9a075a"],
+["1994赛季哥伦比亚主场 Colombia 1994 Home","5f5f820b"],
+["2011/12赛季阿森纳客场蓝黑 Arsenal 2011-12 Away Blue-Black","858cceb0"],
+["2010/11赛季切尔西客场黑色 Chelsea 2010-11 Away Black","bf427c47"],
+["2007/08赛季拜仁主场 Bayern Munich 2007-08 Home","f742874b"],
+["2018/19赛季巴萨主场 Barcelona 2018-19 Home","26f76908"],
+["2010赛季西班牙守门员绿色 Spain 2010 GK Green","0914a5aa"],
+["2008/09赛季巴萨主场LS Barcelona 2008-09 Home Long Sleeve","9a39d606"],
+["1998/99赛季切尔西二客黑色 Chelsea 1998-99 Third Black","c8c162af"],
+["2008/09赛季里昂主场 Lyon 2008-09 Home","1668b007"],
+["2018赛季世界杯法国客场 France 2018 World Cup Away","095f0c09"],
+["2001/02赛季巴黎主场LS PSG 2001-02 Home Long Sleeve","bd60b864"],
+["1996/97赛季AC客场白色 AC Milan 1996-97 Away White","7420965c"],
+["2020/21赛季巴萨客场黑色 Barcelona 2020-21 Away Black","a342504f"],
+["1999/00赛季AC米兰客场黄色 AC Milan 1999-00 Away Yellow","5efe6bfe"],
+["1995/97赛季贝蒂斯客场 Betis 1995-97 Away","4cd9f7d8"],
+["2016/17赛季切尔西主场 Chelsea 2016-17 Home","1076af8f"],
+["1994赛季德国客场 Germany 1994 Away","7667f508"],
+["1994/96赛季利物浦二客黄色 Liverpool 1994-96 Third Yellow","04bf2f3e"],
+["1997/98赛季AC米兰主场 AC Milan 1997-98 Home","612e6039"],
+["1995/97赛季热刺客场紫色 Tottenham 1995-97 Away Purple","55818d9b"],
+["2013/14赛季波尔图主场 Porto 2013-14 Home","7be4f32d"],
+["2008赛季德国主场 Germany 2008 Home","68dd86b5"],
+["2012/13赛季切尔西二客黑色 Chelsea 2012-13 Away Black","d367d2aa"],
+["2010赛季阿根廷主场 Argentina 2010 Home","d0519874"],
+["1985/86赛季利物浦二客黄色 Liverpool 1985-86 Third Yellow","97c7388d"],
+["2007/08赛季皇马主场 Real Madrid 2007-08 Home","2eb5606c"],
+["1999/00赛季拉齐奥主场 Lazio 1999-00 Home","c22def25"],
+["1999/00赛季马竞主场 Atletico Madrid 1999-00 Home","b6e72aea"],
+["2008赛季西班牙主场 Spain 2008 Home","5bb35c05"],
+["2014赛季哥伦比亚主场 Colombia 2014 Home","2dbeb18d"],
+["2007/08赛季曼联守门员蓝色 Manchester United 2007-08 GK Blue","a6f03f8b"],
+["2013/14赛季皇马二客橙色 Real Madrid 2013-14 Away Orange","4d331955"],
+["2019/20赛季曼联二客黑色 Manchester United 2019-20 Away Black","b56427ad"],
+["1997/99赛季拜仁主场LS Bayern Munich 1997-99 Home Long Sleeve","2c875e3c"],
+// Page 2
+["1987/88赛季那不勒斯主场LS Napoli 1987-88 Home Long Sleeve","87ad392f"],
+["2013/14赛季皇马二客橙色LS Real Madrid 2013-14 Away Orange Long Sleeve","4973286a"],
+["2010/11赛季AC米兰主场 AC Milan 2010-11 Home","2060d5f5"],
+["1994/95赛季国米客场白色 Inter Milan 1994-95 Away White","d952263b"],
+["2014/15赛季罗马主场 Roma 2014-15 Home","1ea60ab2"],
+["1998赛季荷兰主场 Netherlands 1998 Home","b20345a1"],
+["2016赛季葡萄牙主场LS Portugal 2016 Home Long Sleeve","f39947ee"],
+["2018赛季世界杯法国主场LS France 2018 World Cup Home Long Sleeve","b7a4193b"],
+["1999/00赛季尤文客场蓝色 Juventus 1999-00 Away Blue","3abff22f"],
+["2006/07赛季日本客场白色 Japan 2006-07 Away White","bf791772"],
+["2004/05赛季巴黎主场 PSG 2004-05 Home","7d804674"],
+["1995赛季墨西哥客场 Mexico 1995 Away","e9d267fc"],
+["1995赛季墨西哥主场 Mexico 1995 Home","1378c9a2"],
+["1999/00赛季里斯本主场 Sporting Lisbon 1999-00 Home","b5f500e0"],
+["1995/96赛季利兹联主场白色 Leeds United 1995-96 Home White","8b98365f"],
+["1995/96赛季博塔弗戈客场黑色 Botafogo 1995-96 Away Black","f165d08f"],
+["2002/03赛季皇马主场带广告 Real Madrid 2002-03 Home With Sponsor","abe89d80"],
+["1990赛季哥伦比亚客场红色 Colombia 1990 Away Red","6a209e98"],
+["1995/96赛季里昂主场 Lyon 1995-96 Home","e9d0ecac"],
+["1984/85赛季皇马主场 Real Madrid 1984-85 Home","211bbb3c"],
+["2001赛季哥伦比亚主场 Colombia 2001 Home","bed450a8"],
+["2010/11赛季皇马主场 Real Madrid 2010-11 Home","d0da8201"],
+["1990赛季哥伦比亚主场 Colombia 1990 Home","441e78c0"],
+["2002赛季塞内加尔客场绿色 Senegal 2002 Away Green","73f9e188"],
+["2002赛季塞内加尔主场白色 Senegal 2002 Home White","02521435"],
+["2010赛季葡萄牙主场 Portugal 2010 Home","60ef8fb7"],
+["2004/05赛季巴黎客场红色 PSG 2004-05 Away Red","c21b5da4"],
+["2004/05赛季巴萨客场宝蓝色 Barcelona 2004-05 Away Blue","88aba541"],
+["1995/96赛季博塔弗戈二客白色 Botafogo 1995-96 Third White","7991f0d9"],
+["1994/96赛季阿森纳主场 Arsenal 1994-96 Home","68c06349"],
+["1993/94赛季AC主场 AC Milan 1993-94 Home","aaf6fd80"],
+["1999/00赛季AC主场 AC Milan 1999-00 Home","6d425216"],
+["2000/01赛季拜仁主场 Bayern Munich 2000-01 Home","bd17d5d6"],
+["1998/99赛季国米客场白色 Inter Milan 1998-99 Away White","e52a8462"],
+["2011/12赛季曼联客场蓝色 Manchester United 2011-12 Away Blue","43df0bcc"],
+["1998/99赛季荷兰客场蓝色 Netherlands 1998-99 Away Blue","c0b070bd"],
+["2006/07赛季切尔西主场 Chelsea 2006-07 Home","b3e0cd31"],
+["2002赛季巴西主场LS Brazil 2002 Home Long Sleeve","d535c744"],
+["凯尔特人主场138周年 Celtic 138th Anniversary Home","72bab8e0"],
+["2012/13赛季巴西主场 Brazil 2012-13 Home","680cd3b6"],
+["1997赛季巴西客场蓝色 Brazil 1997 Away Blue","2ba8f6fd"],
+["2004赛季葡萄牙客场白色 Portugal 2004 Away White","077aae34"],
+["1996/97赛季博卡客场白色 Boca Juniors 1996-97 Away White","40609731"],
+["1986赛季阿根廷主场LS Argentina 1986 Home Long Sleeve","c2e42480"],
+["1999/00赛季利物浦客场绿色 Liverpool 1999-00 Away Green","57a856de"],
+["1999/00赛季国米主场 Inter Milan 1999-00 Home","4c8e93aa"],
+["2011/12赛季尤文客场粉色 Juventus 2011-12 Away Pink","21eeb62a"],
+["2000赛季巴西主场 Brazil 2000 Home","31fcb443"],
+["2010/11赛季国米主场 Inter Milan 2010-11 Home","19540717"],
+["2007/08赛季曼城主场 Manchester City 2007-08 Home","360d8bcb"],
+["2013赛季巴西主场 Brazil 2013 Home","0dd1278e"],
+["2016赛季葡萄牙主场 Portugal 2016 Home","df92467c"],
+["2000/01赛季纽卡斯尔联主场 Newcastle 2000-01 Home","7a6bf623"],
+["2019/20赛季阿森纳主场 Arsenal 2019-20 Home","eeabde39"],
+["2018赛季世界杯法国主场 France 2018 World Cup Home","10f0bf0a"],
+["1996/97赛季阿根廷主场LS Argentina 1996-97 Home Long Sleeve","3aedfab9"],
+["2010/11赛季曼联客场白色欧冠LS Manchester United 2010-11 Away CL","80745ec3"],
+["2005/06赛季皇马客场宝蓝色LS Real Madrid 2005-06 Away Blue Long Sleeve","db6e5731"],
+["2006/07赛季利物浦主场LS Liverpool 2006-07 Home Long Sleeve","21342f5c"],
+["1998赛季英格兰二客黑色 England 1998 Away Black","7e10a1a8"],
+["2000/01赛季阿森纳客场黄色 Arsenal 2000-01 Away Yellow","05e76e9d"],
+["1997/98赛季AC米兰客场白色 AC Milan 1997-98 Away White","f8c2d25e"],
+["1998/00赛季纽卡斯尔联客场宝蓝 Newcastle 1998-00 Away Blue","b2135f8b"],
+["1994/96赛季皇马主场 Real Madrid 1994-96 Home","56699e8f"],
+["1996赛季法国主场 France 1996 Home","f204b1d7"],
+["2007/08赛季阿森纳客场白色 Arsenal 2007-08 Away White","25c9159a"],
+["2010/11赛季国米客场白色 Inter Milan 2010-11 Away White","b7f0855e"],
+["2019/20赛季皇马主场 Real Madrid 2019-20 Home","43776f4d"],
+["1999/01赛季皇马客场LS Real Madrid 1999-01 Away Long Sleeve","0af2a832"],
+["1998/00赛季皇马主场LS Real Madrid 1998-00 Home Long Sleeve","b11fcc34"],
+["2011/12赛季阿森纳主场 Arsenal 2011-12 Home","4f73ea95"],
+["1999赛季博卡客场白色 Boca Juniors 1999 Away White","3dc2e77d"],
+["1995/96赛季国米主场 Inter Milan 1995-96 Home","34da1821"],
+["2011/12赛季曼联主场 Manchester United 2011-12 Home","1b612471"],
+["2006/07赛季拜仁主场 Bayern Munich 2006-07 Home","c1079b72"],
+["2008/09赛季热刺主场 Tottenham 2008-09 Home","2f9068a8"],
+["2001赛季阿根廷主场马拉多纳纪念 Argentina 2001 Maradona Tribute","a22a363f"],
+["2006/07赛季热刺主场 Tottenham 2006-07 Home","ab52579f"],
+["1992/94赛季国米主场 Inter Milan 1992-94 Home","576d2bc7"],
+["2014/15赛季AC米兰主场 AC Milan 2014-15 Home","6a58f17e"],
+["2015/16赛季皇马主场LS Real Madrid 2015-16 Home Long Sleeve","95967b75"],
+["1996赛季西班牙二客白色 Spain 1996 Away White","2219744c"],
+["2006/07赛季热刺客场蓝色 Tottenham 2006-07 Away Blue","4395be3d"],
+["1986赛季热刺主场 Tottenham 1986 Home","2303be60"],
+["1994/95赛季尼日利亚主场 Nigeria 1994-95 Home","4488fb8e"],
+["1992/93赛季马赛主场 Marseille 1992-93 Home","8f373487"],
+["2011/12赛季尤文主场 Juventus 2011-12 Home","50033ea3"],
+["2006/07赛季巴萨客场橙色 Barcelona 2006-07 Away Orange","0bc08ec7"],
+["2003/04赛季尤文主场 Juventus 2003-04 Home","f8d09c8e"],
+["2002/04赛季阿森纳客场蓝色 Arsenal 2002-04 Away Blue","7dc1cb34"],
+["1995赛季意大利客场白色 Italy 1995 Away White","df92b469"],
+["2018赛季阿根廷主场 Argentina 2018 Home","58ded211"],
+["2000/01赛季博卡主场 Boca Juniors 2000-01 Home","90ec9e23"],
+["1991/92赛季巴萨客场橙色 Barcelona 1991-92 Away Orange","3dfecfc9"],
+["1998赛季巴西守门员 Brazil 1998 GK","89fc7f59"],
+["1996/97赛季拉齐奥主场 Lazio 1996-97 Home","412df0e7"],
+["1999/00赛季拉科鲁尼亚客场绿色LS Deportivo La Coruna 1999-00 Away Green","7ec861f7"],
+["1998/99佛罗伦萨主场LS Fiorentina 1998-99 Home Long Sleeve","bee9f733"],
+["1994/95赛季巴黎客场白色 PSG 1994-95 Away White","eba597cf"],
+["1991/92赛季利物浦主场 Liverpool 1991-92 Home","0b0774a6"],
+["1998/99赛季马赛二客金色 Marseille 1998-99 Third Gold","ffb75412"],
+["1994/95赛季多特主场 Dortmund 1994-95 Home","f513b348"],
+["1995/96赛季巴黎客场白色 PSG 1995-96 Away White","64b60ca8"],
+["1992/93赛季利物浦主场 Liverpool 1992-93 Home","25bd72a3"],
+["1992/93赛季利物浦客场绿色 Liverpool 1992-93 Away Green","bbdf3a61"],
+["1988/90赛季国米主场 Inter Milan 1988-90 Home","344bf4b2"],
+["2019/20赛季巴萨主场 Barcelona 2019-20 Home","a5ac5275"],
+["2012/13赛季曼联主场 Manchester United 2012-13 Home","73bf82b9"],
+["2009/10赛季国米客场白色 Inter Milan 2009-10 Away White","a8030158"],
+["2004/05赛季国米主场 Inter Milan 2004-05 Home","b6811e86"],
+// Page 3
+["2014赛季荷兰客场 Netherlands 2014 Away","7e678866"],
+["2014赛季荷兰主场 Netherlands 2014 Home","4a5029cf"],
+["2001/03赛季切尔西主场 Chelsea 2001-03 Home","f6b13def"],
+["1989赛季多特主场 Dortmund 1989 Home","8f8f4013"],
+["2014赛季墨西哥客场红色 Mexico 2014 Away Red","41db15a0"],
+["2006赛季巴西客场 Brazil 2006 Away","cfd6c122"],
+["2008赛季荷兰主场 Netherlands 2008 Home","c2ec3b43"],
+["AC米兰120周年纪念版主场 AC Milan 120th Anniversary Home","02d3cd65"],
+["1998赛季利物浦主场 Liverpool 1998 Home","6812f3d1"],
+["2000/01赛季巴黎客场灰色翻领 PSG 2000-01 Away Grey V-neck","73eb7e5e"],
+["2006赛季意大利守门员 Italy 2006 GK","c2bfc109"],
+["1998/99佛罗伦萨客场 Fiorentina 1998-99 Away","a247468d"],
+["1986/87赛季皇马客场蓝色 Real Madrid 1986-87 Away Blue","42ade73a"],
+["2012/13赛季巴黎主场 PSG 2012-13 Home","0c638cff"],
+["2011/12赛季曼城主场 Manchester City 2011-12 Home","92d31240"],
+["2006/07赛季巴萨主场 Barcelona 2006-07 Home","95d3b44e"],
+["2005/06赛季皇马二客灰色 Real Madrid 2005-06 Third Grey","787c97be"],
+["2004/05赛季皇马主场 Real Madrid 2004-05 Home","3870d9bc"],
+["2003/04赛季巴萨主场 Barcelona 2003-04 Home","94c8b93a"],
+["1994赛季阿根廷主场 Argentina 1994 Home","9978d169"],
+["1998/99佛罗伦萨主场 Fiorentina 1998-99 Home","99e014fb"],
+["2016/17赛季巴萨客场紫色 Barcelona 2016-17 Away Purple","4aa35b50"],
+["2014/15赛季巴萨二客荧光绿 Barcelona 2014-15 Third Neon Green","534a5467"],
+["1986赛季阿根廷主场 Argentina 1986 Home","a10fd22e"],
+["1995/97赛季纽卡斯尔联客场 Newcastle 1995-97 Away","68c5d278"],
+["2004/05赛季马竞主场 Atletico Madrid 2004-05 Home","0dd0e13e"],
+["2001/02赛季皇马主场 Real Madrid 2001-02 Home","2ce77cfa"],
+["1997/98赛季AC米兰三客特别版 AC Milan 1997-98 Third Special","f4989de2"],
+["2012/13赛季巴萨客场橙色 Barcelona 2012-13 Away Orange","aaa13682"],
+["2001/02赛季巴黎主场 PSG 2001-02 Home","a23f0cdc"],
+["1998/99赛季罗马客场LS Roma 1998-99 Away Long Sleeve","449584d9"],
+["1998/99赛季罗马客场 Roma 1998-99 Away","25f77c17"],
+["1988/89赛季AC主场LS AC Milan 1988-89 Home Long Sleeve","5fcbf9e7"],
+["1997/98赛季皇马主场 Real Madrid 1997-98 Home","a7293a8b"],
+["1988/89赛季AC主场 AC Milan 1988-89 Home","f79a9cae"],
+["2015/16赛季皇马主场 Real Madrid 2015-16 Home","271ab60d"],
+["2009/10赛季皇马主场 Real Madrid 2009-10 Home","fe5b7d9a"],
+["2010/11赛季巴萨客场 Barcelona 2010-11 Away","19ab0993"],
+["1998/99赛季喀麦隆客场黄色 Cameroon 1998-99 Away Yellow","0d19e0f3"],
+["1997/98赛季尤文客场粉色 Juventus 1997-98 Away Pink","8b054447"],
+["1996/97赛季AC主场 AC Milan 1996-97 Home","0eaca3be"],
+["1995/97赛季拜仁主场 Bayern Munich 1995-97 Home","e7a4bb44"],
+["1999/00赛季西班牙人主场 Espanyol 1999-00 Home","e4403f58"],
+["1999/00赛季罗马客场 Roma 1999-00 Away","27765247"],
+["1999/00赛季罗马主场 Roma 1999-00 Home","d4c38362"],
+["1998/99赛季曼城客场 Manchester City 1998-99 Away","f0ae540f"],
+["1993/94赛季巴西客场 Brazil 1993-94 Away","e29e030f"],
+["1990/92赛季皇马主场 Real Madrid 1990-92 Home","55483c77"],
+["2015/16赛季AC米兰 AC Milan 2015-16","ac8866f0"],
+["2014/15赛季阿森纳主场 Arsenal 2014-15 Home","47043435"],
+["2007/08赛季阿森纳二客 Arsenal 2007-08 Third","f28a08bb"],
+["2005/06赛季曼联客场蓝色 Manchester United 2005-06 Away Blue","2164ccc3"],
+["2003/04赛季AC主场 AC Milan 2003-04 Home","3be4ac46"],
+["2001/02赛季巴黎客场 PSG 2001-02 Away","c8c3e3c2"],
+["2001/02赛季巴黎二客 PSG 2001-02 Third","1d272517"],
+["1995赛季意大利主场 Italy 1995 Home","44357c22"],
+["1994赛季法国主场 France 1994 Home","e0a122c9"],
+["2013赛季英格兰主场 England 2013 Home","4c9b1f85"],
+["2004赛季巴西客场 Brazil 2004 Away","9db0d870"],
+["2000/02赛季AC米兰主场 AC Milan 2000-02 Home","a0473abe"],
+["2010/11赛季阿森纳主场 Arsenal 2010-11 Home","8eed436f"],
+["2004/05赛季马竞客场 Atletico Madrid 2004-05 Away","58b5f31b"],
+["2003/05赛季切尔西主场 Chelsea 2003-05 Home","f27f2c8f"],
+["2002/03赛季曼联客场 Manchester United 2002-03 Away","402500fa"],
+["1997/98赛季AC米兰客场特别版 AC Milan 1997-98 Away Special","b7eb3cf1"],
+["1997/98赛季AC米兰二客特别版 AC Milan 1997-98 Third Edition","e21290b1"],
+["1994赛季法国客场 France 1994 Away","a4215f59"],
+["2014赛季巴西客场 Brazil 2014 Away","faa6ef98"],
+["1998/99赛季罗马主场 Roma 1998-99 Home","bdbc6910"],
+["1998/99赛季喀麦隆主场 Cameroon 1998-99 Home","b407eecb"],
+["1995/97赛季纽卡斯尔联主场 Newcastle 1995-97 Home","c7826c5b"],
+["1997/98赛季AC米兰二客 AC Milan 1997-98 Second Away","0c2f355f"],
+["1998/99赛季皇马客场宝蓝 Real Madrid 1998-99 Away Blue","5c47a4ec"],
+["1996/97赛季博卡主场 Boca Juniors 1996-97 Home","60dfb0ad"],
+["1998赛季英格兰客场 England 1998 Away","bc5ab98f"],
+["2010赛季西班牙主场 Spain 2010 Home","aaaa322f"],
+["1997/98赛季拉科鲁尼亚主场蓝白 Deportivo La Coruna 1997-98 Home","6592dca2"],
+["2016/17赛季皇马二客 Real Madrid 2016-17 Third","9a63ebde"],
+["2013/14赛季马竞客场 Atletico Madrid 2013-14 Away","11264a4a"],
+["2013/14赛季巴萨主场 Barcelona 2013-14 Home","160c626f"],
+["2008/09赛季巴萨客场 Barcelona 2008-09 Away","1d9256fe"],
+["2010/11赛季利物浦主场 Liverpool 2010-11 Home","69b0fd31"],
+["2007/08赛季巴萨主场 Barcelona 2007-08 Home","a78bdfa3"],
+["2004/05赛季皇马客场 Real Madrid 2004-05 Away","780c4140"],
+["2004/05赛季AC主场 AC Milan 2004-05 Home","27fe46d9"],
+["1999/00赛季瓦伦西亚主场 Valencia 1999-00 Home","1defff0d"],
+["1995/97赛季尤文主场 Juventus 1995-97 Home","0094e9db"],
+["2010/11赛季巴萨主场联赛 Barcelona 2010-11 Home League","a0bf7823"],
+["2005/06赛季阿森纳客场 Arsenal 2005-06 Away","ce073216"],
+["2003/04赛季里斯本主场 Sporting Lisbon 2003-04 Home","b5ce6c1c"],
+["2006/07赛季热刺客场蓝 Tottenham 2006-07 Away Blue","4395be3d"],
+["1995赛季美洲客场蓝色 Club America 1995 Away Blue","4db796a1"],
+["1995赛季美洲主场黄色 Club America 1995 Home Yellow","315842c8"],
+["1999/00赛季巴萨主场百年纪念LS Barcelona 1999-00 Home Centenary Long Sleeve","3f59ae19"],
+["1999/00赛季瓦伦西亚二客 Valencia 1999-00 Third","67c9c237"],
+["1999/00赛季纽卡斯尔联客场 Newcastle 1999-00 Away","366c394d"],
+["1999/00赛季拉科鲁尼亚二客金色 Deportivo La Coruna 1999-00 Third Gold","afef1085"],
+["1997/98赛季国米客场 Inter Milan 1997-98 Away","4cebfb7f"],
+["1991/92赛季利物浦客场 Liverpool 1991-92 Away","209d5314"],
+["2016/17赛季皇马主场 Real Madrid 2016-17 Home","a2b4746e"],
+["2014/15赛季皇马主场 Real Madrid 2014-15 Home","57398d17"],
+["2006/07赛季阿森纳主场 Arsenal 2006-07 Home","078f0d15"],
+// Page 4
+["1998/99赛季阿森纳主场 Arsenal 1998-99 Home","4bbffaaf"],
+["1997/98赛季巴萨主场 Barcelona 1997-98 Home","dab6f081"],
+["1996/97赛季阿森纳主场 Arsenal 1996-97 Home","0740af55"],
+["1994/96赛季皇马客场 Real Madrid 1994-96 Away","572e0f50"],
+["2014/15赛季皇马客场玫红色 Real Madrid 2014-15 Away Pink","a415aaa9"],
+["1987/88赛季那不勒斯主场 Napoli 1987-88 Home","520f8bae"],
+["2018/19赛季利物浦主场 Liverpool 2018-19 Home","ff50971a"],
+["2011/12赛季巴萨客场 Barcelona 2011-12 Away","85fa3aed"],
+["2005/06赛季巴萨客场 Barcelona 2005-06 Away","5fb29cfb"],
+["2003/05赛季切尔西客场 Chelsea 2003-05 Away","9cb4668e"],
+["2002/03赛季AC客场 AC Milan 2002-03 Away","d80f8107"],
+["2002/03赛季AC主场 AC Milan 2002-03 Home","c41ef0a6"],
+["2001/02赛季巴萨客场 Barcelona 2001-02 Away","40583c18"],
+["2001/02赛季阿森纳主场 Arsenal 2001-02 Home","51c2bb6c"],
+["1989/92赛季巴萨主场 Barcelona 1989-92 Home","d5ad8616"],
+["1994/95赛季阿森纳客场 Arsenal 1994-95 Away","f14030dd"],
+["1998赛季摩洛哥主场 Morocco 1998 Home","83e6cf16"],
+["1996赛季意大利客场 Italy 1996 Away","5d489a44"],
+["2020/21赛季巴萨主场 Barcelona 2020-21 Home","c87c1bcb"],
+["2012赛季意大利主场 Italy 2012 Home","994e9d0f"],
+["2012赛季西班牙主场 Spain 2012 Home","04499611"],
+["2010赛季巴西主场 Brazil 2010 Home","e69d8e0a"],
+["2000/01赛季利物浦客场 Liverpool 2000-01 Away","8d9e52d9"],
+["2003/05赛季曼联客场 Manchester United 2003-05 Away","84a3854d"],
+["1995/97赛季热刺主场 Tottenham 1995-97 Home","1309f1f2"],
+["1980/81赛季利物浦主场 Liverpool 1980-81 Home","1a158368"],
+["1997/98赛季国米主场 Inter Milan 1997-98 Home","ff3f8969"],
+["1997赛季巴西主场 Brazil 1997 Home","2c85c8af"],
+["1978/79赛季利物浦主场 Liverpool 1978-79 Home","44ff1add"],
+["1988赛季东德主场 East Germany 1988 Home","3c0c0460"],
+["2014赛季巴西主场 Brazil 2014 Home","279cd6da"],
+["1976/77赛季利物浦主场 Liverpool 1976-77 Home","cf00b191"],
+["1999/00赛季拉科鲁尼亚主场 Deportivo La Coruna 1999-00 Home","87b5102a"],
+["2009/10赛季国米主场LS Inter Milan 2009-10 Home Long Sleeve","06a5ab86"],
+["1993/95赛季利物浦主场LS Liverpool 1993-95 Home Long Sleeve","73151a08"],
+["2017/18赛季巴萨主场LS Barcelona 2017-18 Home Long Sleeve","affb67ca"],
+["2017/18赛季皇马客场LS Real Madrid 2017-18 Away Long Sleeve","20f12635"],
+["1995/97赛季巴萨主场LS Barcelona 1995-97 Home Long Sleeve","08717134"],
+["2013/14赛季皇马主场LS Real Madrid 2013-14 Home Long Sleeve","ad36857f"],
+["1997/99赛季切尔西主场 Chelsea 1997-99 Home","d9fe2e7e"],
+["1999/00赛季尤文主场 Juventus 1999-00 Home","335fbdd3"],
+["1998/99赛季巴萨客场 Barcelona 1998-99 Away","70340703"],
+["1998/99赛季巴萨主场 Barcelona 1998-99 Home","312b47e9"],
+["1997/99赛季热刺主场 Tottenham 1997-99 Home","b7584420"],
+["1997/99赛季阿森纳客场 Arsenal 1997-99 Away","12137b19"],
+["1996/97赛季利物浦黑色 Liverpool 1996-97 Away Black","8129d439"],
+["1995/97赛季贝蒂斯主场无广告 Betis 1995-97 Home No Sponsor","98c5b66d"],
+["1993/94赛季那不勒斯主场 Napoli 1993-94 Home","0511fffa"],
+["1993/94赛季巴黎主场 PSG 1993-94 Home","f8ba7377"],
+["2022赛季阿根廷主场 Argentina 2022 World Cup Home","54b7fe75"],
+["2022赛季阿根廷客场 Argentina 2022 Away","10b859db"],
+["2017/18赛季皇马客场 Real Madrid 2017-18 Away","f85e9656"],
+["2015/16赛季巴萨二客 Barcelona 2015-16 Third","0a2bdc61"],
+["2014/15赛季拉齐奥主场 Lazio 2014-15 Home","369f9b60"],
+["2013/14赛季曼联客场 Manchester United 2013-14 Away","1ce866e6"],
+["2013/14赛季曼城主场 Manchester City 2013-14 Home","afeff13c"],
+["2013/14赛季曼城二客白色 Manchester City 2013-14 Third White","5c8cb4bb"],
+["2013/14赛季巴萨二客黑色 Barcelona 2013-14 Third Black","dcefd559"],
+["2003/04赛季博卡主场 Boca Juniors 2003-04 Home","d71f947c"],
+["1996赛季巴西客场 Brazil 1996 Away","4583acfb"],
+["2014赛季阿根廷客场 Argentina 2014 Away","0a3f3871"],
+["2006赛季葡萄牙客场 Portugal 2006 Away","027a59ed"],
+["1998/99赛季曼联白色 Manchester United 1998-99 Away White","1874e429"],
+["1995/96赛季国米客场 Inter Milan 1995-96 Away","38958e08"],
+["1995/96赛季马竞主场 Atletico Madrid 1995-96 Home","34195d90"],
+["1996/97赛季皇马客场 Real Madrid 1996-97 Away","9d726236"],
+["1997赛季多特主场 Dortmund 1997 Home","21505978"],
+["1992/93赛季利物浦主场 Liverpool 1992-93 Home","ead02915"],
+["1986/87赛季利物浦主场 Liverpool 1986-87 Home","12775794"],
+["1986/87赛季皇马主场 Real Madrid 1986-87 Home","f6e35bcb"],
+["2010赛季曼联主场 Manchester United 2010 Home","cf2f06de"],
+["2017/18赛季巴萨主场 Barcelona 2017-18 Home","a0335638"],
+["2014/15赛季切尔西主场 Chelsea 2014-15 Home","874f3295"],
+["2013/14赛季曼联主场 Manchester United 2013-14 Home","9b0a02b6"],
+["2013/14赛季巴萨客场黄色 Barcelona 2013-14 Away Yellow","54df4cb3"],
+["2010/11赛季皇马客场 Real Madrid 2010-11 Away","ac51536a"],
+["2008/09赛季曼联客场欧冠 Manchester United 2008-09 Away CL","f1b34346"],
+["2008/09赛季国米主场 Inter Milan 2008-09 Home","40bd1513"],
+["2004/05赛季巴萨主场 Barcelona 2004-05 Home","7e564dfd"],
+["2004/05赛季阿森纳客场 Arsenal 2004-05 Away","b7f2e854"],
+["2001/02赛季皇马客场 Real Madrid 2001-02 Away","f01a03d1"],
+["1998赛季葡萄牙主场 Portugal 1998 Home","099c8aaa"],
+["1982赛季法国主场 France 1982 Home","71d53db4"],
+["1998/99赛季曼联二客 Manchester United 1998-99 Third","20780813"],
+["2011/12赛季巴萨主场 Barcelona 2011-12 Home","e57a986f"],
+["2006赛季英格兰主场 England 2006 Home","378f8c29"],
+["2006赛季巴西主场 Brazil 2006 Home","aded0ffd"],
+["2004赛季葡萄牙主场 Portugal 2004 Home","0050d985"],
+["1992/94赛季罗马主场 Roma 1992-94 Home","32f69769"],
+["2000/01赛季皇马主场 Real Madrid 2000-01 Home","53928286"],
+["2010/11赛季曼联客场白色欧冠 Manchester United 2010-11 Away CL","4dff1d5a"],
+["2012/13赛季切尔西客场白色 Chelsea 2012-13 Away White","2ea8a4db"],
+["1998/99赛季巴黎客场 PSG 1998-99 Away","9c5709d2"],
+["2001/02赛季利物浦客场 Liverpool 2001-02 Away","c98c222d"],
+["1998/00赛季皇马二客宝蓝 Real Madrid 1998-00 Third Blue","d38c053c"],
+// Page 5
+["2014/15赛季拜仁主场 Bayern Munich 2014-15 Home","2d208b34"],
+["2008/09赛季AC主场 AC Milan 2008-09 Home","6828a40e"],
+["2005/06赛季皇马客场宝蓝 Real Madrid 2005-06 Away Blue","29c79ee1"],
+["2006赛季葡萄牙主场 Portugal 2006 Home","a2ce59f0"],
+["2002赛季西班牙主场 Spain 2002 Home","1fad803b"],
+["2018/19赛季曼联主场 Manchester United 2018-19 Home","7f0bad46"],
+["2001/03赛季里斯本主场 Sporting Lisbon 2001-03 Home","f8b408e9"],
+["1999/00赛季拉科鲁尼亚客场绿色 Deportivo La Coruna 1999-00 Away Green","6bb896e3"],
+["1999/00赛季贝蒂斯主场 Betis 1999-00 Home","ee762f71"],
+["1995/96赛季巴黎主场 PSG 1995-96 Home","1a53703f"],
+["1994/95赛季尤文主场 Juventus 1994-95 Home","eb2a16da"],
+["1994/95赛季马竞主场 Atletico Madrid 1994-95 Home","a00d33dc"],
+["1994/95赛季本菲卡主场 Benfica 1994-95 Home","17077785"],
+["1992/95赛季巴萨主场 Barcelona 1992-95 Home","a1d0fba7"],
+["2016/17赛季巴萨主场 Barcelona 2016-17 Home","23712382"],
+["2014赛季墨西哥主场 Mexico 2014 Home","3b5aa0cf"],
+["1970赛季墨西哥主场 Mexico 1970 Home","2059660d"],
+["1995/97赛季贝蒂斯主场带广告 Betis 1995-97 Home With Sponsor","f6a2b541"],
+["2011/12赛季切尔西二客 Chelsea 2011-12 Third","c49a69cd"],
+["1991/92赛季拉齐奥主场 Lazio 1991-92 Home","88b94271"],
+["2006/07赛季AC米兰二客黑色 AC Milan 2006-07 Third Black","865b34f8"],
+["2012/13赛季多特主场 Dortmund 2012-13 Home","fa21ff20"],
+["2004/06赛季曼联主场 Manchester United 2004-06 Home","2ae65aec"],
+["2000/01赛季曼联客场 Manchester United 2000-01 Away","592dfae1"],
+["1996/97赛季皇马主场 Real Madrid 1996-97 Home","c8c79e6d"],
+["1997/98赛季皇马二客 Real Madrid 1997-98 Third","0d2356bd"],
+["2006/07赛季皇马紫色第三套 Real Madrid 2006-07 Third Purple","75e5a009"],
+["2009/10赛季国米主场 Inter Milan 2009-10 Home","fa123acd"],
+["1999/00赛季瓦伦西亚客场 Valencia 1999-00 Away","cd442697"],
+["2008/09赛季曼联客场 Manchester United 2008-09 Away","6afcbcc5"],
+["2007/08赛季巴萨客场 Barcelona 2007-08 Away","56621d8d"],
+["2003/04赛季巴萨客场 Barcelona 2003-04 Away","f97d06a6"],
+["1998赛季巴西客场 Brazil 1998 Away","59763b79"],
+["2013/14赛季拜仁主场 Bayern Munich 2013-14 Home","3b83a3d0"],
+["2000赛季法国主场 France 2000 Home","8a3cf8db"],
+["2003/04赛季皇马主场 Real Madrid 2003-04 Home","412eb2ad"],
+["2002/04赛季阿森纳主场 Arsenal 2002-04 Home","462b83db"],
+["2001/02赛季阿森纳客场 Arsenal 2001-02 Away","2066dee0"],
+["2004/05赛季阿森纳主场 Arsenal 2004-05 Home","3e135c3c"],
+["2012/13赛季巴萨主场 Barcelona 2012-13 Home","97b9e358"],
+["2009/10赛季巴萨主场 Barcelona 2009-10 Home","82c05e60"],
+["2016/17赛季日本客场 Japan 2016-17 Away","b3349a86"],
+["2015/16赛季巴萨主场 Barcelona 2015-16 Home","f26d12e2"],
+["2001/02赛季巴萨主场 Barcelona 2001-02 Home","dcced4c8"],
+["1996/97赛季阿森纳客场 Arsenal 1996-97 Away","1c799d1b"],
+["2016/17赛季AC主场 AC Milan 2016-17 Home","d6fbed92"],
+["2005/06赛季皇马主场 Real Madrid 2005-06 Home","58dc8d12"],
+["1994赛季西班牙客场 Spain 1994 Away","f1f89125"],
+["2018赛季日本主场 Japan 2018 Home","66be0441"],
+["2004赛季巴西主场 Brazil 2004 Home","ff9896b4"],
+["2004/05赛季阿森纳主场2 Arsenal 2004-05 Home Alt","3e135c3c"],
+["2010/11赛季巴萨主场欧冠 Barcelona 2010-11 Home CL","0b960634"],
+["1989/91赛季利物浦客场 Liverpool 1989-91 Away","5bbf002f"],
+["1998/99赛季曼联黑色 Manchester United 1998-99 Away Black","e8041b92"],
+["1998/99赛季拉齐奥黄色LS Lazio 1998-99 Away Yellow Long Sleeve","6f2ab2d6"],
+["1995/97赛季切尔西主场 Chelsea 1995-97 Home","a392042e"],
+["2000赛季日本主场 Japan 2000 Home","66f3f635"],
+["1999/00赛季巴萨主场百年纪念版 Barcelona 1999-00 Home Centenary","a3ed847e"],
+["2009/10赛季AC米兰客场 AC Milan 2009-10 Away","25ecff49"],
+["弗拉门戈复古 Flamengo Retro","1b9d1da6"],
+["2008/09赛季巴萨主场 Barcelona 2008-09 Home","4c4f1213"],
+["2002/04赛季曼联主场 Manchester United 2002-04 Home","e1b0da17"],
+["2000/01赛季弗拉门戈主场 Flamengo 2000-01 Home","95682496"],
+["2005/06赛季阿森纳主场 Arsenal 2005-06 Home","df280563"],
+["1993/95赛季拜仁客场LS Bayern Munich 1993-95 Away Long Sleeve","afa639ab"],
+["1993/95赛季拜仁主场LS Bayern Munich 1993-95 Home Long Sleeve","c8a8020c"],
+["2006赛季法国主场 France 2006 Home","b5fa427e"],
+["1998/99赛季尤文主场 Juventus 1998-99 Home","dea5e0eb"],
+["1992赛季英格兰二客 England 1992 Third","8d40146e"],
+["1992赛季英格兰客场 England 1992 Away","94958a86"],
+["1992赛季英格兰主场 England 1992 Home","8b85e062"],
+["2006赛季意大利主场 Italy 2006 Home","31fc55ba"],
+["1994/95赛季西班牙主场 Spain 1994-95 Home","09b28ac0"],
+["2002赛季巴西客场 Brazil 2002 Away","ef045506"],
+["1998赛季克罗地亚客场 Croatia 1998 Away","ed3a4814"],
+["1992/94赛季葡萄牙客场 Portugal 1992-94 Away","701da7a8"],
+["1992/94赛季葡萄牙主场 Portugal 1992-94 Home","bd964f8f"],
+["1998赛季克罗地亚主场 Croatia 1998 Home","0e40d90d"],
+["2009/10赛季弗拉门戈主场 Flamengo 2009-10 Home","1df91e9a"],
+["2002/03赛季德国主场 Germany 2002-03 Home","09f7b1f3"],
+["1991赛季阿根廷主场 Argentina 1991 Home","e985dcf1"],
+["1996/97赛季阿根廷主场 Argentina 1996-97 Home","0ee040c9"],
+["1994赛季意大利主场 Italy 1994 Home","59fd9e71"],
+["1994赛季意大利客场 Italy 1994 Away","b9a7aa52"],
+["1995/97赛季巴萨主场 Barcelona 1995-97 Home","6ca20bcb"],
+["2006赛季德国主场 Germany 2006 Home","8d052c01"],
+["1998赛季德国主场 Germany 1998 Home","e905f44e"],
+["1986赛季德国主场 Germany 1986 Home","5f7ffcd1"],
+["1995赛季弗拉门戈主场 Flamengo 1995 Home","c838c0b4"],
+["1994赛季弗拉门戈主场百年纪念款 Flamengo 1994 Home Anniversary","a947c13c"],
+["2001赛季弗拉门戈客场 Flamengo 2001 Away","7441a000"],
+["1999/01赛季英格兰主场 England 1999-01 Home","7e5ee5a1"],
+["1998/99赛季挪威主场 Norway 1998-99 Home","4b6f3973"],
+["1998/99赛季AC米兰主场 AC Milan 1998-99 Home","29952833"],
+// Page 6
+["1985/86赛季利物浦主场 Liverpool 1985-86 Home","bf10b834"],
+["1985/86赛季利物浦客场 Liverpool 1985-86 Away","79e93cb8"],
+["1996/97赛季利物浦主场 Liverpool 1996-97 Home","ce238719"],
+["1996/97赛季利物浦客场 Liverpool 1996-97 Away","38e731b1"],
+["2005/06赛季利物浦主场 Liverpool 2005-06 Home","df9efe81"],
+["1989/91赛季利物浦主场 Liverpool 1989-91 Home","0053bc6b"],
+["1998赛季法国客场决赛版 France 1998 Away Final","cb2a0489"],
+["1995/96赛季利物浦主场 Liverpool 1995-96 Home","5eae72e4"],
+["1993/95赛季利物浦客场 Liverpool 1993-95 Away","aab29f96"],
+["1993/95赛季利物浦主场 Liverpool 1993-95 Home","10495a6a"],
+["2004/05赛季利物浦 Liverpool 2004-05","e92c1305"],
+["2004/05赛季利物浦主场 Liverpool 2004-05 Home","16e9fe60"],
+["2012赛季洛杉矶银河主场 LA Galaxy 2012 Home","63c3a599"],
+["2014/15赛季利物浦主场 Liverpool 2014-15 Home","18e604f2"],
+["1995/96赛季利物浦客场 Liverpool 1995-96 Away","0ae7664f"],
+["2006/07赛季利物浦主场 Liverpool 2006-07 Home","abbf84cf"],
+["1998/99赛季AC二客 AC Milan 1998-99 Third","b448b1f6"],
+["2002赛季苏格兰主场 Scotland 2002 Home","21170510"],
+["1996赛季德国主场 Germany 1996 Home","73969fe9"],
+["1996赛季土耳其主场 Turkey 1996 Home","c2bfe5da"],
+["1996赛季土耳其客场 Turkey 1996 Away","686465bb"],
+["2010/11赛季曼联主场 Manchester United 2010-11 Home","f8270348"],
+["2013/14赛季皇马主场 Real Madrid 2013-14 Home","11751d97"],
+["2006赛季阿根廷客场 Argentina 2006 Away","9da45b4e"],
+["2016/17赛季皇马客场 Real Madrid 2016-17 Away","fb869457"],
+["2003/04赛季曼联客场 Manchester United 2003-04 Away","0846d609"],
+["1990赛季南斯拉夫客场 Yugoslavia 1990 Away","a647ba9d"],
+["2017/18赛季皇马主场 Real Madrid 2017-18 Home","4f8ec494"],
+["2014/15赛季尤文主场 Juventus 2014-15 Home","05798ee0"],
+["2008/09赛季皇马客场 Real Madrid 2008-09 Away","a7acdd34"],
+["2008/09赛季皇马主场 Real Madrid 2008-09 Home","06a44882"],
+["2006/07赛季皇马主场 Real Madrid 2006-07 Home","072957a7"],
+["1999赛季帕尔梅拉斯解放者杯冠军款 Palmeiras 1999 Copa Lib Winner","955776e8"],
+["1997/98赛季曼城客场 Manchester City 1997-98 Away","b3d8418b"],
+["2010赛季墨西哥客场 Mexico 2010 Away","dd5efeea"],
+["1995/97赛季巴萨客场 Barcelona 1995-97 Away","ed0d7043"],
+["1989/90赛季阿贾克斯客场 Ajax 1989-90 Away","9de4856e"],
+["1994/95赛季阿贾克斯客场 Ajax 1994-95 Away","58e43a5b"],
+["1989/90赛季阿贾克斯主场 Ajax 1989-90 Home","e3bdf307"],
+["1989/91赛季切尔西主场 Chelsea 1989-91 Home","9d5294b1"],
+["1996/97赛季流浪者主场 Rangers 1996-97 Home","dbb98787"],
+["1998/99赛季凯尔特人主场 Celtic 1998-99 Home","adeeb568"],
+["1986/88赛季阿森纳客场 Arsenal 1986-88 Away","91a71b76"],
+["1988/90赛季阿森纳主场 Arsenal 1988-90 Home","2fad7c66"],
+["1988/90赛季阿森纳客场 Arsenal 1988-90 Away","34d82fa2"],
+["1991/93赛季阿森纳客场 Arsenal 1991-93 Away","7e1ac64e"],
+["1992/93赛季阿森纳主场 Arsenal 1992-93 Home","c509e8e2"],
+["1993/94赛季曼联客场 Manchester United 1993-94 Away","fa481fc1"],
+["1983赛季曼联客场 Manchester United 1983 Away","731621e0"],
+["2007/08赛季曼联客场 Manchester United 2007-08 Away","aeb03117"],
+["1984赛季曼联主场 Manchester United 1984 Home","8db61289"],
+["1985赛季曼联主场 Manchester United 1985 Home","6ff3626c"],
+["1985赛季曼联二客 Manchester United 1985 Third","1a3c132a"],
+["1986/88赛季曼联主场红色 Manchester United 1986-88 Home","a2bdc297"],
+["1986/88赛季曼联客场白色 Manchester United 1986-88 Away","56834d61"],
+["1986/88赛季曼联二客蓝色 Manchester United 1986-88 Third Blue","d42b4627"],
+["1990/92赛季曼联客场 Manchester United 1990-92 Away","ec501a32"],
+["1988/90赛季曼联主场 Manchester United 1988-90 Home","32ebe74d"],
+["1988/90赛季曼联客场 Manchester United 1988-90 Away","529da4c4"],
+["1988/90赛季曼联二客 Manchester United 1988-90 Third","eb6b098d"],
+["1992/93赛季曼联客场 Manchester United 1992-93 Away","6aa2aaa1"],
+["1994/96赛季曼联二客 Manchester United 1994-96 Third","25f6bfed"],
+["1996/98赛季曼联二客 Manchester United 1996-98 Third","9e3e2cd8"],
+["1999/00赛季曼联主场 Manchester United 1999-00 Home","994fc800"],
+["2000/01赛季拉齐奥二客 Lazio 2000-01 Third","a79dabea"],
+["1992/94赛季曼联主场 Manchester United 1992-94 Home","17a0e893"],
+["1995/96赛季曼联客场 Manchester United 1995-96 Away","09a0f1f8"],
+["2011/12赛季切尔西主场 Chelsea 2011-12 Home","7253b6f3"],
+["1984/86赛季凯尔特人主场 Celtic 1984-86 Home","82b79089"],
+["1989/91赛季凯尔特人主场 Celtic 1989-91 Home","66ee870c"],
+["1992/94赛季热刺客场黄色 Tottenham 1992-94 Away Yellow","78052359"],
+["1987/88赛季凯尔特人主场 Celtic 1987-88 Home","6191a19d"],
+["1994/96赛季苏格兰客场 Scotland 1994-96 Away","64f76779"],
+["2006/07赛季曼联主场 Manchester United 2006-07 Home","abab89d2"],
+["1995赛季阿森纳客场 Arsenal 1995 Away","c571d360"],
+["1996/97赛季曼联主场 Manchester United 1996-97 Home","e02e8dc3"],
+["1998赛季英格兰主场 England 1998 Home","bf27207d"],
+["1996赛季英格兰客场 England 1996 Away","73121d2d"],
+["1983/86赛季阿森纳客场 Arsenal 1983-86 Away","ab886d69"],
+["2006/07赛季凯尔特人客场 Celtic 2006-07 Away","104f490d"],
+["1988赛季荷兰主场 Netherlands 1988 Home","1eb2189d"],
+["1994/95赛季热刺客场 Tottenham 1994-95 Away","db250054"],
+["1996/98赛季苏格兰主场 Scotland 1996-98 Home","d610cd34"],
+// Page 7 (key ones)
+["2012/13赛季切尔西主场 Chelsea 2012-13 Home","0455ba90"],
+["1995/96赛季尤文客场 Juventus 1995-96 Away","532ccf1b"],
+["2014/15赛季巴萨主场 Barcelona 2014-15 Home","65e47ab9"],
+["2000/02赛季曼联主场 Manchester United 2000-02 Home","45ae2cb0"],
+["1990赛季英格兰主场 England 1990 Home","d1fffe85"],
+["1997/98赛季尤文主场 Juventus 1997-98 Home","f6f397b1"],
+["2007/08赛季AC客场 AC Milan 2007-08 Away","f61ddbd1"],
+["1998/99赛季国米主场 Inter Milan 1998-99 Home","acdbd611"],
+["1995/96赛季国米客场绿色 Inter Milan 1995-96 Away Green","fbb033bc"],
+["1995/96赛季AC米兰主场 AC Milan 1995-96 Home","bb395ddc"],
+["2006/07赛季AC米兰客场 AC Milan 2006-07 Away","86f9e500"],
+["2006/07赛季AC主场 AC Milan 2006-07 Home","8c38bade"],
+["1994赛季阿根廷客场 Argentina 1994 Away","12af718b"],
+["1996/97赛季阿根廷主场 Argentina 1996-97 Home","0ee040c9"],
+["1992赛季德国主场 Germany 1992 Home","69dc1deb"],
+["1992赛季德国客场 Germany 1992 Away","9cf08e14"],
+["1996赛季德国客场 Germany 1996 Away","ca2af1ec"],
+["2009/10赛季AC米兰主场 AC Milan 2009-10 Home","6205022d"],
+["1998/99赛季国米二客 Inter Milan 1998-99 Third","ca61226d"],
+["2015/16赛季尤文客场 Juventus 2015-16 Away","8deacea8"],
+["1999/00赛季马赛二客 Marseille 1999-00 Third","5ce6aba7"],
+// Page 8 (key ones)
+["1995赛季弗拉门戈主场 Flamengo 1995 Home","c838c0b4"],
+["1994赛季弗拉门戈主场百年纪念款 Flamengo 1994 Home Anniversary","a947c13c"],
+["1997/98赛季国米二客 Inter Milan 1997-98 Third","4ee825c7"],
+["2022赛季阿根廷主场 Argentina 2022 World Cup Home","54b7fe75"],
+["1998/99赛季拜仁客场 Bayern Munich 1998-99 Away","cd87f957"],
+["1994/95赛季英格兰主场 England 1994-95 Home","30e01552"],
+["1994/95赛季热刺主场 Tottenham 1994-95 Home","e9fdd54b"],
+["1998/99赛季马赛主场 Marseille 1998-99 Home","5a9522d5"],
+["1998/00赛季切尔西客场 Chelsea 1998-00 Away","2d58ada4"],
+["1998/99赛季马赛客场 Marseille 1998-99 Away","4aaaa219"],
+["2004/05赛季尤文主场 Juventus 2004-05 Home","e1d1fcfc"],
+["1992/94赛季爱尔兰主场 Ireland 1992-94 Home","5631be59"],
+["2013/14赛季AC米兰 AC Milan 2013-14","064ebec0"],
+["2012/13赛季皇马主场 Real Madrid 2012-13 Home","bf5eb807"],
+["2012/13赛季皇马二客 Real Madrid 2012-13 Third","d3c74c18"],
+["2014/15赛季皇马二客 Real Madrid 2014-15 Third","9b76bcb1"],
+["2012/13赛季皇马客场 Real Madrid 2012-13 Away","4c1e77f5"],
+["2011/12赛季皇马客场 Real Madrid 2011-12 Away","28a27cd0"],
+["2007/08赛季AC二客 AC Milan 2007-08 Third","1978b756"],
+["2005/06赛季阿森纳主场 Arsenal 2005-06 Home","df280563"],
+["2004/05赛季拜仁客场 Bayern Munich 2004-05 Away","7652e2e6"],
+["2002赛季阿根廷客场 Argentina 2002 Away","79645874"],
+["1998/99赛季AC米兰主场 AC Milan 1998-99 Home","29952833"],
+];
+
+// ── PRODUCTS from index.html ──
+const PRODUCTS = [
+{id:1,name:"Rayo Vallecano 97-98 Home",img:"e7b9c937"},{id:2,name:"Atletico Madrid 10-11 Away",img:"63cea382"},{id:3,name:"Atletico Madrid 16-17 Home",img:"c65708bd"},{id:4,name:"Tenerife 98-99 Away",img:"7f48cbcb"},{id:5,name:"Murcia 99-01 Home Red",img:"b7bd57db"},{id:6,name:"Granada 05-06 Home",img:"8558cf0a"},{id:7,name:"Atletico Madrid 02-03 Home",img:"4df73d7f"},{id:8,name:"Atletico Madrid 82-83 Home",img:"16f08591"},{id:9,name:"Mallorca 96-97 Home",img:"48515939"},{id:10,name:"Sporting Gijon 94-95 Home",img:"7f0bcfa0"},
+{id:11,name:"Atletico Madrid 02-03 Away",img:"706416d7"},{id:12,name:"Cologne 96-97 Home",img:"89f4f3f6"},{id:13,name:"Sheffield Wednesday 94-95 Home",img:"fb016bce"},{id:14,name:"Deportivo La Coruna 94-95 Home",img:"3c676b7e"},{id:15,name:"Marseille 98-99 Home",img:"20bd3f6e"},{id:16,name:"Marseille 98-99 Away",img:"d214b247"},{id:17,name:"River Plate 98-99 Home",img:"2d035f26"},{id:18,name:"Scotland 96-98 Home",img:"0ca34839"},{id:19,name:"Marseille 96-97 Home",img:"f64f538d"},{id:20,name:"River Plate 96-97 Home",img:"b7f994fa"},
+{id:21,name:"Scotland 95-96 Away",img:"e04bc2c3"},{id:22,name:"PSV 95-96 Home",img:"39a8abe1"},{id:23,name:"PSV 95-96 Away",img:"39fddf9a"},{id:24,name:"Ajax 95-96 Away",img:"25ceed93"},{id:25,name:"Celtic 93-95 Home",img:"66839d25"},{id:26,name:"River Plate 92-94 Home",img:"f91aaf75"},{id:27,name:"Inter Milan 91-92 Away",img:"4ba42e77"},{id:28,name:"Inter Milan 91-92 Third",img:"18573581"},{id:29,name:"France 90-91 Home",img:"17000a61"},{id:30,name:"Real Madrid 05-06 Third",img:"0457ba6a"},
+{id:31,name:"Manchester United 05-06 Away",img:"75013b7f"},{id:32,name:"Liverpool 04-05 Away",img:"7500aa41"},{id:33,name:"England 1982 Home",img:"c8871a4e"},{id:34,name:"Tottenham 1986 Home",img:"7e9a0bbc"},{id:35,name:"Brazil 2014 Away",img:"b6d96823"},{id:36,name:"Las Palmas 00-01 Home",img:"112cfd68"},{id:37,name:"Malaga 2013 Third",img:"19beb3d3"},{id:38,name:"Zaragoza 1984 Away",img:"e0a350f5"},{id:39,name:"Oviedo 1995 Home",img:"65298412"},{id:40,name:"Celta 03-04 Home",img:"f9937ea5"},
+{id:41,name:"Zaragoza 99-00 Home",img:"a520efec"},{id:42,name:"Barcelona 98-99 Away",img:"139b9f6d"},{id:43,name:"Atletico Madrid 98-99 Home",img:"daf83307"},{id:44,name:"Atletico Madrid 98-99 Away",img:"ef1f4623"},{id:45,name:"Valencia 99-00 Home",img:"e91a5d7b"},{id:46,name:"Valencia 99-00 Third",img:"ff096516"},{id:47,name:"Spain 98-99 Home",img:"cb271f51"},{id:48,name:"Spain 98-99 Away",img:"c88a1d9d"},{id:49,name:"Getafe 09-10 Home",img:"b3fd5a83"},{id:50,name:"Oviedo 90-91 Home Blue",img:"498472da"},
+{id:51,name:"Villarreal 04-05 Home",img:"58ea0b15"},{id:52,name:"Hercules 96-97 Home",img:"ca6a0ac1"},{id:53,name:"Cadiz 91-92 Home",img:"c3cbdd6b"},{id:54,name:"Sevilla 92-93 Away",img:"7537439a"},{id:55,name:"Arsenal 91-93 Away Yellow",img:"e546e117"},{id:56,name:"Sevilla 91-92 Home",img:"8faeb24a"},{id:57,name:"Sevilla 91-92 Away Red",img:"36855a6f"},{id:58,name:"Cadiz 91-92 Retro",img:"7df18e40"},{id:59,name:"Sevilla 87-90 Home",img:"0958974a"},{id:60,name:"Sevilla 87-90 Away",img:"84a30bcb"},
+{id:61,name:"Iron Maiden 2016 Home Black",img:"126fe205"},{id:62,name:"Valencia 2006-07 Away",img:"7a14a7b0"},{id:63,name:"River Plate 1999-00 Away",img:"26afd040"},{id:64,name:"River Plate 2005-06 Away",img:"4ba51352"},{id:65,name:"Brazil 2024 Training Green",img:"575d7551"},{id:66,name:"Celta 2001-02 Second Away",img:"d4f7aa7a"},{id:67,name:"Italy 2000 Home",img:"6c23f149"},{id:68,name:"Spain 1998 Away White",img:"64685a26"},{id:69,name:"France 1980-82 Away",img:"78520e44"},{id:70,name:"Japan 1998 GK Flame Green",img:"ecf634d7"},
+{id:71,name:"Roma 2001-02 Home",img:"8e92fdbc"},{id:72,name:"Spain 2008 Away",img:"2765f178"},{id:73,name:"Ajax 1989-90 Away",img:"f9cdd3b5"},{id:74,name:"France 1980-82 Home",img:"1acf6811"},{id:75,name:"Ajax 1994-95 Home",img:"1d286dff"},{id:76,name:"Celta 1999-00 Home Blue",img:"210b7504"},{id:77,name:"Newcastle 1997-99 Home",img:"37cd7ab9"},{id:78,name:"Newcastle 2005-06 Home",img:"812206d0"},{id:79,name:"West Ham 1999 Away",img:"034e1208"},{id:80,name:"West Ham 1999 Home",img:"8e1ab04d"},
+{id:81,name:"Brazil 1992 Away Blue",img:"19b7dc34"},{id:82,name:"Iron Maiden 2008 Away Yellow",img:"8d3ba236"},{id:83,name:"Roma 2001-02 Long Sleeve",img:"a123102b"},{id:84,name:"Bayern Munich 2003-04 Home",img:"3c503b22"},{id:85,name:"Netherlands 1996 Home",img:"11434570"},{id:86,name:"Lazio 1996-97 Home",img:"412df0e7"},{id:87,name:"Dortmund 1995-96 Home",img:"b55f3adf"},{id:88,name:"Italy 1982 Home",img:"fcc21038"},{id:89,name:"Bayern Munich 2001-02 Home",img:"4c169b07"},{id:90,name:"AC Milan 2008-09 Home",img:"6828a40e"},
+{id:91,name:"Germany 1988-90 Away Black",img:"c07a650c"},{id:92,name:"Juventus 2012-13 Away Black",img:"2232eadc"},{id:93,name:"AC Milan 2012-13 Home",img:"9831d900"},{id:94,name:"AC Milan 2011-12 Home",img:"8a74331d"},{id:125,name:"Liverpool 2010-11 Home",img:"69b0fd31"},{id:126,name:"Manchester United 1998-99 Away",img:"1874e429"},{id:127,name:"Liverpool 1998 Away White",img:"a0538ee1"},{id:128,name:"Portugal 2018 Home",img:"2aed1cc7"},{id:129,name:"Roma 2000-01 Home",img:"5e20c2d7"},{id:130,name:"Arsenal 2008-10 Home",img:"77867383"},
+{id:131,name:"Spain 2011-12 Away White",img:"b1860be3"},{id:132,name:"Valencia 2000-01 Home",img:"219888f1"},{id:133,name:"Fiorentina 1992-93 Away",img:"6f367da8"},{id:134,name:"Fiorentina 1992-93 Home",img:"65bab46f"},{id:135,name:"Barcelona 2000-01 Home",img:"e4d67e94"},{id:136,name:"Ajax 94-95 Home",img:"1d286dff"},{id:137,name:"Inter Milan 98-99 Away",img:"e52a8462"},{id:138,name:"Arsenal 1998-99 Home",img:"4bbffaaf"},{id:139,name:"Arsenal 2005-06 Home",img:"df280563"},{id:140,name:"Arsenal 2002-04 Home",img:"462b83db"},
+{id:141,name:"Arsenal 2002-04 Away Blue",img:"7dc1cb34"},{id:142,name:"Arsenal 2004-05 Home",img:"3e135c3c"},{id:143,name:"Arsenal 2004-05 Away",img:"b7f2e854"},{id:144,name:"Arsenal 2000-02 Home",img:"51c2bb6c"},{id:145,name:"Arsenal 2000-01 Away Yellow",img:"05e76e9d"},{id:146,name:"Arsenal 1999-00 Home",img:"4bbffaaf"},{id:147,name:"Arsenal 1999-00 Away Yellow",img:"05e76e9d"},{id:150,name:"Manchester United 2013-14 Home",img:"9b0a02b6"},{id:151,name:"Liverpool 2000-01 Away",img:"8d9e52d9"},{id:152,name:"Valencia 1999-00 Away",img:"cd442697"},
+{id:153,name:"AC Milan 2004-05 Away",img:"32602929"},{id:154,name:"Inter Milan 2001-02 Home",img:"3c50e8ca"},{id:155,name:"Argentina 1978 Home",img:"c64f5f91"},{id:156,name:"AC Milan 1997-98 Third Special",img:"f4989de2"},{id:157,name:"Inter Milan 1997-98 Away",img:"4cebfb7f"},{id:158,name:"Manchester United 2018-19 Away Pink",img:"8d4b835c"},{id:159,name:"Malaga 1997-98 Home",img:"1ebe0f77"},{id:160,name:"Spain 2012 Away",img:"90db7689"},{id:161,name:"Barcelona 2015-16 Third",img:"0a2bdc61"},{id:162,name:"Celtic 2006-07 Away",img:"104f490d"},
+{id:163,name:"Netherlands 2010 Home",img:"cbc6a01d"},{id:164,name:"Netherlands 2010 Away",img:"2e643374"},{id:165,name:"Spain 2000 Away",img:"d515791c"},{id:166,name:"Flamengo 1995 Home",img:"c838c0b4"},{id:167,name:"Arsenal 2003-04 Away",img:"ce073216"},{id:168,name:"Japan 2014 Home",img:"6a91829d"},{id:169,name:"PSG 2000-01 Home",img:"a23f0cdc"},{id:170,name:"AC Milan 2014-15 Home",img:"6a58f17e"},{id:171,name:"Inter Milan 2004-05 Third",img:"c1978e5d"},{id:172,name:"Spain 2000 Home",img:"1fad803b"},
+{id:173,name:"Inter Milan 2007-08 Home",img:"40bd1513"},{id:174,name:"Liverpool 1986-87 Home",img:"12775794"},{id:175,name:"AC Milan 1997-98 Special",img:"b7eb3cf1"},{id:176,name:"AC Milan 1989-90 Away",img:"9b8c781b"},{id:177,name:"AC Milan 1997-98 Away",img:"f8c2d25e"},{id:178,name:"Manchester United 2007-08 GK",img:"a6f03f8b"},{id:179,name:"AC Milan 1997-98 Third",img:"0c2f355f"},{id:180,name:"Germany 2006 Home",img:"8d052c01"},{id:181,name:"Brazil 2012-13 Home",img:"680cd3b6"},{id:182,name:"Flamengo 1994 Home",img:"a947c13c"},
+{id:183,name:"Fiorentina 1999-00 Away",img:"a247468d"},{id:184,name:"Bayern Munich 1998-00 Away",img:"d9d2e380"},{id:185,name:"Romania 2000 Home",img:"33c31c61"},{id:186,name:"Nigeria 1994 Home",img:"4488fb8e"},{id:187,name:"Brazil 2002 Away",img:"ef045506"},{id:188,name:"Newcastle 2004-05 Away",img:"0e32440c"},{id:189,name:"Manchester City 2012-13 Away",img:"7e08e509"},{id:190,name:"Manchester City 2008-09 Away",img:"d532dbf6"},{id:191,name:"Real Madrid 1984-85 Away",img:"bcdc9396"},{id:192,name:"Manchester City 2007-08 Away",img:"271d475c"},
+{id:193,name:"Real Madrid 2006-07 Third",img:"75e5a009"},
+];
+
+// State
+let current = 0;
+let state = JSON.parse(localStorage.getItem('asignar2_state') || '{}');
+// state[id] = {status:'ok'|'wrong'|'skip', newImg:'hash', newName:'name'}
+
+function save() { localStorage.setItem('asignar2_state', JSON.stringify(state)); updateProgress(); }
+
+function getState(id) { return state[id] || {}; }
+
+// Build grid
+const gridEl = document.getElementById('grid-inner');
+document.getElementById('g-count').textContent = PRODUCTS.length;
+PRODUCTS.forEach((p,i) => {
+  const d = document.createElement('div');
+  d.className = 'prod-thumb';
+  d.id = 'g-'+p.id;
+  d.title = '#'+p.id+' '+p.name;
+  d.innerHTML = `<img src="img/${p.img}.jpg" loading="lazy" onerror="this.style.background='#333';this.src=''"/><div class="pid">#${p.id}</div>`;
+  d.onclick = () => { current = i; render(); d.scrollIntoView({block:'nearest'}); };
+  gridEl.appendChild(d);
+});
+
+function render() {
+  const p = PRODUCTS[current];
+  const s = getState(p.id);
+  // Update active state in grid
+  document.querySelectorAll('.prod-thumb').forEach(el => el.classList.remove('active'));
+  const gEl = document.getElementById('g-'+p.id);
+  if(gEl) { gEl.classList.add('active'); gEl.scrollIntoView({block:'nearest'}); }
+  // Main display
+  const imgHash = s.newImg || p.img;
+  const name = s.newName || p.name;
+  document.getElementById('cur-img').src = 'img/' + imgHash + '.jpg';
+  document.getElementById('cur-id').textContent = 'ID: ' + p.id + ' (' + (current+1) + '/' + PRODUCTS.length + ')';
+  document.getElementById('cur-name').textContent = name;
+  document.getElementById('name-edit').value = name;
+  document.getElementById('top-title').textContent = '#'+p.id+' — '+name;
+  // Status buttons
+  document.getElementById('btn-ok').style.opacity = s.status === 'ok' ? '1' : '0.6';
+  document.getElementById('btn-wrong').style.opacity = s.status === 'wrong' ? '1' : '0.6';
+  // Pre-fill search with product name
+  const q = name.replace(/\d{4}[-\/]\d{2,4}/g,'').trim().split(' ').slice(0,2).join(' ');
+  document.getElementById('search-input').value = q;
+  doSearch(q);
+}
+
+function markOk() {
+  const p = PRODUCTS[current];
+  const s = getState(p.id);
+  s.status = 'ok';
+  state[p.id] = s;
+  save();
+  const gEl = document.getElementById('g-'+p.id);
+  if(gEl) { gEl.classList.remove('wrong'); gEl.classList.add('ok'); }
+  render();
+  setTimeout(() => navigate(1), 300);
+}
+
+function markWrong() {
+  const p = PRODUCTS[current];
+  const s = getState(p.id);
+  s.status = 'wrong';
+  state[p.id] = s;
+  save();
+  const gEl = document.getElementById('g-'+p.id);
+  if(gEl) { gEl.classList.remove('ok'); gEl.classList.add('wrong'); }
+  render();
+}
+
+function navigate(dir) {
+  current = Math.max(0, Math.min(PRODUCTS.length-1, current + dir));
+  render();
+}
+
+function doSearch(q) {
+  const resultsEl = document.getElementById('results');
+  if(!q || q.length < 2) { resultsEl.innerHTML = '<div style="color:#555;font-size:12px;padding:20px">Escribe al menos 2 caracteres para buscar...</div>'; document.getElementById('search-count').textContent = '0 resultados'; return; }
+  const terms = q.toLowerCase().split(/\s+/).filter(t => t.length > 1);
+  const matches = ALBUMS.filter(([title]) => {
+    const t = title.toLowerCase();
+    return terms.every(term => t.includes(term));
+  }).slice(0,60);
+  document.getElementById('search-count').textContent = matches.length + ' resultados';
+  resultsEl.innerHTML = '';
+  matches.forEach(([title, hash]) => {
+    const c = document.createElement('div');
+    c.className = 'result-card';
+    const engTitle = title.replace(/.*?([A-Z].+)/, '$1').trim() || title;
+    c.innerHTML = `
+      <img src="https://photo.yupoo.com/classic-football-fhirts052/${hash}/small.jpg"
+           referrerpolicy="no-referrer" loading="lazy"
+           onerror="this.src='img/${hash}.jpg'" alt="${engTitle}"/>
+      <div class="r-title">${engTitle}</div>
+      <div class="r-hash">${hash}</div>`;
+    c.onclick = () => assignAlbum(hash, extractName(title));
+    resultsEl.appendChild(c);
+  });
+}
+
+function extractName(title) {
+  // Get the English part after Chinese text
+  const m = title.match(/[A-Z][A-Za-z].*$/);
+  return m ? m[0].trim() : title;
+}
+
+function assignAlbum(newHash, newName) {
+  const p = PRODUCTS[current];
+  const nameInput = document.getElementById('name-edit').value.trim() || newName;
+  // Download the image locally if not already there
+  state[p.id] = { status:'assigned', newImg: newHash, newName: nameInput, oldImg: p.img };
+  save();
+  // Update current product's img in display
+  document.getElementById('cur-img').src = 'img/' + newHash + '.jpg';
+  document.getElementById('cur-name').textContent = nameInput;
+  document.getElementById('cur-img').onerror = function(){
+    this.src = 'https://photo.yupoo.com/classic-football-fhirts052/'+newHash+'/medium.jpg';
+  };
+  const gEl = document.getElementById('g-'+p.id);
+  if(gEl) { gEl.classList.add('ok'); gEl.querySelector('img').src = 'img/'+newHash+'.jpg'; }
+  // Show confirmation
+  document.getElementById('top-title').textContent = '✅ Asignado: #'+p.id+' → '+nameInput;
+  setTimeout(() => navigate(1), 500);
+}
+
+function updateProgress() {
+  let ok=0, wrong=0;
+  PRODUCTS.forEach(p => {
+    const s = getState(p.id);
+    if(s.status === 'ok' || s.status === 'assigned') ok++;
+    else if(s.status === 'wrong') wrong++;
+    const gEl = document.getElementById('g-'+p.id);
+    if(gEl) {
+      gEl.classList.toggle('ok', s.status === 'ok' || s.status === 'assigned');
+      gEl.classList.toggle('wrong', s.status === 'wrong');
+    }
+  });
+  document.getElementById('p-ok').textContent = ok;
+  document.getElementById('p-wrong').textContent = wrong;
+  document.getElementById('p-total').textContent = PRODUCTS.length - ok - wrong;
+}
+
+function showExport() {
+  const assignments = Object.entries(state).filter(([,s]) => s.newImg && s.newImg !== PRODUCTS.find(p=>p.id==+[...Object.keys(state)].find(k=>k==_))?.img );
+  const changes = [];
+  Object.entries(state).forEach(([id, s]) => {
+    if(s.newImg || s.newName) {
+      const p = PRODUCTS.find(p => p.id === +id);
+      if(p) {
+        const imgChanged = s.newImg && s.newImg !== p.img;
+        const nameChanged = s.newName && s.newName !== p.name;
+        if(imgChanged || nameChanged) {
+          changes.push({id:+id, oldImg:p.img, newImg: s.newImg||p.img, oldName:p.name, newName: s.newName||p.name});
+        }
+      }
+    }
+  });
+
+  let script = `#!/usr/bin/env python3
+# Auto-generated correction script from asignar-v2.html
+# Run: python apply_corrections.py
+import re, os, ssl, urllib.request, time
+
+HTML_FILE = "index.html"
+IMG_FOLDER = "img"
+
+CORRECTIONS = {
+${changes.map(c => `  ${c.id}: {"img": "${c.newImg}", "name": "${c.newName}"},`).join('\n')}
+}
+
+ssl_ctx = ssl.create_default_context()
+ssl_ctx.check_hostname = False
+ssl_ctx.verify_mode = ssl.CERT_NONE
+headers = {"User-Agent":"Mozilla/5.0","Referer":"https://www.yupoo.com/"}
+
+with open(HTML_FILE, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+for pid, corr in CORRECTIONS.items():
+    new_hash = corr['img']
+    new_name = corr['name']
+    dest = os.path.join(IMG_FOLDER, new_hash + '.jpg')
+    if not os.path.exists(dest) or os.path.getsize(dest) < 1000:
+        url = f"https://photo.yupoo.com/classic-football-fhirts052/{new_hash}/medium.jpg"
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=20, context=ssl_ctx) as r:
+                data = r.read()
+            with open(dest, 'wb') as f: f.write(data)
+            print(f"Downloaded {new_hash}.jpg")
+            time.sleep(0.3)
+        except Exception as e:
+            print(f"ERROR downloading {new_hash}: {e}")
+    p = re.compile(r'(\\{ id:' + str(pid) + r',[^\\n]*img:\\s*")[^"]*(")')
+    html = p.sub(r'\\g<1>img/' + new_hash + r'.jpg\\g<2>', html)
+    p2 = re.compile(r'(\\{ id:' + str(pid) + r',[^\\n]*name:\\s*")[^"]*(")')
+    html = p2.sub(r'\\g<1>' + new_name.replace('\\\\','\\\\\\\\') + r'\\g<2>', html)
+    print(f"Updated ID {pid}: {new_name}")
+
+with open(HTML_FILE, 'w', encoding='utf-8') as f:
+    f.write(html)
+print(f"Done! {len(CORRECTIONS)} products updated.")
+`;
+  document.getElementById('export-text').value = script;
+  document.getElementById('export-area').classList.add('open');
+}
+
+function copyExport() {
+  navigator.clipboard.writeText(document.getElementById('export-text').value)
+    .then(() => alert('Copiado al portapapeles!'));
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if(e.target.tagName === 'INPUT') return;
+  if(e.key === 'ArrowRight' || e.key === 'd') navigate(1);
+  if(e.key === 'ArrowLeft' || e.key === 'a') navigate(-1);
+  if(e.key === 'Enter') markOk();
+  if(e.key === 'x') markWrong();
+});
+
+// Init
+updateProgress();
+render();
+document.getElementById('search-input').focus();
+</script>
+</body>
+</html>

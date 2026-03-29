@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Asignar Fotos — Las Leyendas</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#111;color:#eee;font-family:sans-serif;padding:20px}
+h1{text-align:center;color:#d4a017;margin-bottom:6px;font-size:26px}
+.sub{text-align:center;color:#888;font-size:13px;margin-bottom:20px}
+#topbar{position:sticky;top:0;background:#111;padding:10px 0;z-index:10;border-bottom:1px solid #333;margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
+#progress{font-size:14px;color:#aaa}
+#progress b{color:#d4a017}
+#exportBtn{background:#d4a017;color:#000;border:none;padding:9px 22px;font-weight:bold;font-size:13px;cursor:pointer}
+#exportBtn:disabled{background:#555;color:#888;cursor:default}
+#filterBtn{background:#222;color:#eee;border:1px solid #555;padding:9px 16px;font-size:12px;cursor:pointer}
+#filterBtn.on{background:#d4a017;color:#000;border-color:#d4a017}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:#1a1a1a;border:2px solid #333;padding:10px;transition:.2s}
+.card.done{border-color:#27ae60;opacity:.7}
+.card.skip{border-color:#555;opacity:.5}
+.card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;margin-bottom:10px;background:#000}
+.fname{font-size:10px;color:#555;margin-bottom:8px;word-break:break-all}
+select{width:100%;background:#111;color:#eee;border:1px solid #555;padding:7px 8px;font-size:12px;margin-bottom:8px}
+select:focus{border-color:#d4a017;outline:none}
+.btns{display:flex;gap:6px}
+.btns button{flex:1;padding:6px;font-size:11px;font-weight:bold;border:none;cursor:pointer}
+.btn-ok{background:#27ae60;color:#fff}
+.btn-skip{background:#444;color:#aaa}
+.btn-ok:hover{background:#2ecc71}
+.btn-skip:hover{background:#555}
+#output{display:none;background:#0a0a0a;border:1px solid #d4a017;padding:20px;margin-top:24px;max-width:900px;margin-left:auto;margin-right:auto}
+#output h2{color:#d4a017;margin-bottom:12px;font-size:16px}
+#output textarea{width:100%;height:300px;background:#111;color:#eee;border:1px solid #555;padding:10px;font-family:monospace;font-size:11px;resize:vertical}
+#output p{margin-top:10px;font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<h1>Asignar Fotos a Productos</h1>
+<p class="sub">Ve cada foto, selecciona a qué producto pertenece en el desplegable y pulsa "Asignar". Cuando termines pulsa "Exportar".</p>
+
+<div id="topbar">
+  <span id="progress">Cargando...</span>
+  <button id="filterBtn" onclick="toggleFilter()">Mostrar solo sin asignar</button>
+  <button id="exportBtn" disabled onclick="exportar()">Exportar correcciones</button>
+</div>
+
+<div class="grid" id="grid"></div>
+<div id="output">
+  <h2>Copia este texto y mándalo a Claude</h2>
+  <textarea id="outputText" readonly></textarea>
+  <p>Selecciona todo el texto (Ctrl+A dentro del cuadro) y cópialo (Ctrl+C), luego pégalo en el chat.</p>
+</div>
+
+<script>
+const saved = JSON.parse(localStorage.getItem('foto-assign') || '{}');
+let products = [];
+let allFiles = [];
+let showOnlyPending = false;
+
+// Leer productos del index.html
+fetch('index.html')
+  .then(r => r.text())
+  .then(html => {
+    const m = html.match(/const PRODUCTS\s*=\s*(\[[\s\S]*?\]);/);
+    if (!m) { alert('Error leyendo index.html'); return; }
+    products = eval(m[1]);
+
+    // Lista de archivos img conocidos
+    allFiles = products.map(p => p.img).filter(Boolean);
+    // Quitar duplicados
+    allFiles = [...new Set(allFiles)];
+
+    render();
+    updateProgress();
+  });
+
+function render() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const files = showOnlyPending
+    ? allFiles.filter(f => !saved[f])
+    : allFiles;
+
+  files.forEach(file => {
+    const assigned = saved[file];
+    const card = document.createElement('div');
+    card.className = 'card' + (assigned ? ' done' : '');
+    card.id = 'card-' + file.replace(/[^a-z0-9]/gi, '_');
+
+    // Opciones del select
+    const opts = products.map(p =>
+      `<option value="${p.id}" ${assigned == p.id ? 'selected' : ''}>${p.id} — ${p.name} (${p.era})</option>`
+    ).join('');
+
+    card.innerHTML = `
+      <img src="${file}" loading="lazy" onerror="this.style.background='#333';this.alt='sin foto'"/>
+      <div class="fname">${file}</div>
+      <select id="sel-${file.replace(/[^a-z0-9]/gi,'_')}">
+        <option value="">— ¿Qué producto es esta foto? —</option>
+        ${opts}
+      </select>
+      <div class="btns">
+        <button class="btn-ok" onclick="asignar('${file}')">✓ Asignar</button>
+        <button class="btn-skip" onclick="skip('${file}')">Saltar</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function asignar(file) {
+  const selId = 'sel-' + file.replace(/[^a-z0-9]/gi, '_');
+  const val = document.getElementById(selId).value;
+  if (!val) { alert('Selecciona un producto primero'); return; }
+  saved[file] = parseInt(val);
+  localStorage.setItem('foto-assign', JSON.stringify(saved));
+  const card = document.getElementById('card-' + file.replace(/[^a-z0-9]/gi, '_'));
+  if (card) card.className = 'card done';
+  updateProgress();
+}
+
+function skip(file) {
+  saved[file] = 'skip';
+  localStorage.setItem('foto-assign', JSON.stringify(saved));
+  const card = document.getElementById('card-' + file.replace(/[^a-z0-9]/gi, '_'));
+  if (card) card.className = 'card skip';
+  updateProgress();
+}
+
+function toggleFilter() {
+  showOnlyPending = !showOnlyPending;
+  document.getElementById('filterBtn').className = showOnlyPending ? 'on' : '';
+  document.getElementById('filterBtn').textContent = showOnlyPending ? 'Mostrar todas' : 'Mostrar solo sin asignar';
+  render();
+}
+
+function updateProgress() {
+  const done = Object.values(saved).filter(v => v !== 'skip').length;
+  const skipped = Object.values(saved).filter(v => v === 'skip').length;
+  const total = allFiles.length;
+  document.getElementById('progress').innerHTML =
+    `Asignadas: <b>${done}</b> / ${total} &nbsp;·&nbsp; Saltadas: ${skipped}`;
+  document.getElementById('exportBtn').disabled = done === 0;
+}
+
+function exportar() {
+  // Construir lista de correcciones: { file: "img/xxx.jpg", productId: N }
+  const correcciones = Object.entries(saved)
+    .filter(([f, id]) => id !== 'skip')
+    .map(([file, id]) => {
+      const p = products.find(x => x.id === id);
+      return `${file} → ID ${id}: ${p ? p.name : '?'}`;
+    });
+
+  // También generar el JSON de cambios para aplicar
+  const jsonFix = Object.entries(saved)
+    .filter(([f, id]) => id !== 'skip')
+    .map(([file, id]) => ({ file, id: parseInt(id) }));
+
+  const txt = `=== CORRECCIONES DE FOTOS ===\nTotal: ${correcciones.length} asignaciones\n\n` +
+    correcciones.join('\n') +
+    '\n\n=== JSON ===\n' +
+    JSON.stringify(jsonFix, null, 2);
+
+  document.getElementById('outputText').value = txt;
+  document.getElementById('output').style.display = 'block';
+  document.getElementById('output').scrollIntoView({ behavior: 'smooth' });
+  navigator.clipboard.writeText(txt).catch(() => {});
+}
+</script>
+</body>
+</html>
